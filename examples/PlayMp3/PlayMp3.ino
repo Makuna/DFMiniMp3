@@ -72,7 +72,7 @@ void setup()
   Serial.println(volume);
   mp3.setVolume(24);
   
-  uint16_t count = mp3.getTotalCount();
+  uint16_t count = mp3.getTotalTrackCount();
   Serial.print("files ");
   Serial.println(count);
   
