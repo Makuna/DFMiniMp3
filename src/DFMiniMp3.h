@@ -27,14 +27,14 @@ License along with NeoPixel.  If not, see
 
 enum DfMp3_Error
 {
-    DfMp3_Error_General,
-    DfMp3_Error_Busy,
+    DfMp3_Error_Busy = 1,
     DfMp3_Error_Sleeping,
     DfMp3_Error_SerialWrongStack,
     DfMp3_Error_CheckSumNotMatch,
     DfMp3_Error_FileIndexOut,
     DfMp3_Error_FileMismatch,
     DfMp3_Error_Advertise,
+    DfMp3_Error_General = 0xff
 };
 
 
@@ -163,13 +163,15 @@ public:
         sendPacket(0x05);
     }
 
+    // useless, removed
     // 0-31
+    /*
     void setVolume(bool mute, uint8_t volume)
     {
         uint16_t arg = (!mute << 8) | volume;
         sendPacket(0x10, arg);
     }
-
+    */
 
     void loopGlobalTrack(uint16_t globalTrack)
     {
@@ -210,7 +212,7 @@ public:
         sendPacket(0x0a);
     }
 
-    void reset(bool wait = true)
+    void reset()
     {
         sendPacket(0x0c, 0, 600);
         _isOnline = false;
@@ -237,13 +239,13 @@ public:
         return listenForReply(0x42);
     }
 
-    uint16_t getFolderCount()
+    uint16_t getFolderTrackCount(uint16_t folder)
     {
-        sendPacket(0x4e);
+        sendPacket(0x4e, folder);
         return listenForReply(0x4e);
     }
 
-    uint16_t getTotalCount()
+    uint16_t getTotalTrackCount()
     {
         sendPacket(0x48);
         return listenForReply(0x48);

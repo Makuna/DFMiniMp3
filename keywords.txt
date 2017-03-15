@@ -41,8 +41,8 @@ start	KEYWORD2
 pause	KEYWORD2
 stop	KEYWORD2	
 getStatus	KEYWORD2
-getFolderCount	KEYWORD2
-getTotalCount	KEYWORD2
+getFolderTrackCount	KEYWORD2
+getTotalTrackCount	KEYWORD2
 playAdvertisement	KEYWORD2
 stopAdvertisement	KEYWORD2							
 
