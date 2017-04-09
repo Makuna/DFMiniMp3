@@ -42,6 +42,11 @@ public:
 //
 DFMiniMp3<HardwareSerial, Mp3Notify> mp3(Serial1);
 
+// Some arduino boards only have one hardware serial port, so a software serial port is needed instead.
+// comment out the above definition and uncomment these lines
+//SoftwareSerial secondarySerial(10, 11); // RX, TX
+//DFMiniMp3<SoftwareSerial, Mp3Notify> mp3(secondarySerial);
+
 void setup() 
 {
   
