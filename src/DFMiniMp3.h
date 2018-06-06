@@ -251,6 +251,12 @@ public:
         return listenForReply(0x48);
     }
 
+    uint16_t getTotalFolderCount()
+    {
+        sendPacket(0x4F);
+        return listenForReply(0x4F);
+    }
+
     // sd:/advert/####track name
     void playAdvertisement(uint16_t track)
     {
