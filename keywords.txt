@@ -6,10 +6,10 @@
 # Datatypes (KEYWORD1)
 #######################################
 
-DFMiniMp3       KEYWORD1
-DfMp3_PlaybackMode      KEYWORD1
-DfMp3_Eq        KEYWORD1
-DfMp3_PlaySource        KEYWORD1
+DFMiniMp3	KEYWORD1
+DfMp3_PlaybackMode	KEYWORD1
+DfMp3_Eq	KEYWORD1
+DfMp3_PlaySource	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
@@ -51,18 +51,18 @@ stopAdvertisement	KEYWORD2
 # Constants (LITERAL1)
 #######################################
 
-DfMp3_PlaybackMode_Repeat       LITERAL1
-DfMp3_PlaybackMode_FolderRepeat LITERAL1
-DfMp3_PlaybackMode_SingleRepeat LITERAL1
-DfMp3_PlaybackMode_Random       LITERAL1
-DfMp3_Eq_Normal LITERAL1
-DfMp3_Eq_Pop    LITERAL1
-DfMp3_Eq_Rock   LITERAL1
-DfMp3_Eq_Jazz   LITERAL1
-DfMp3_Eq_Classic        LITERAL1
-DfMp3_Eq_Bass   LITERAL1
-DfMp3_PlaySource_U      LITERAL1
-DfMp3_PlaySource_Sd     LITERAL1
-DfMp3_PlaySource_Aux    LITERAL1
-DfMp3_PlaySource_Sleep  LITERAL1
-DfMp3_PlaySource_Flash  LITERAL1
+DfMp3_PlaybackMode_Repeat	LITERAL1
+DfMp3_PlaybackMode_FolderRepeat	LITERAL1
+DfMp3_PlaybackMode_SingleRepeat	LITERAL1
+DfMp3_PlaybackMode_Random	LITERAL1
+DfMp3_Eq_Normal	LITERAL1
+DfMp3_Eq_Pop	LITERAL1
+DfMp3_Eq_Rock	LITERAL1
+DfMp3_Eq_Jazz	LITERAL1
+DfMp3_Eq_Classic	LITERAL1
+DfMp3_Eq_Bass	LITERAL1
+DfMp3_PlaySource_U	LITERAL1
+DfMp3_PlaySource_Sd	LITERAL1
+DfMp3_PlaySource_Aux	LITERAL1
+DfMp3_PlaySource_Sleep	LITERAL1
+DfMp3_PlaySource_Flash	LITERAL1
