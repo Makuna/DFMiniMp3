@@ -81,7 +81,7 @@ public:
     void begin()
     {
         _serial.begin(9600);
-        _serial.setTimeout(4200);
+        _serial.setTimeout(10000);
         _lastSend = millis();
     }
 
