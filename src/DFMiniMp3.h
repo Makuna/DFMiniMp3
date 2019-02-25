@@ -27,6 +27,7 @@ License along with NeoPixel.  If not, see
 
 enum DfMp3_Error
 {
+    // from device
     DfMp3_Error_Busy = 1,
     DfMp3_Error_Sleeping,
     DfMp3_Error_SerialWrongStack,
@@ -34,6 +35,10 @@ enum DfMp3_Error
     DfMp3_Error_FileIndexOut,
     DfMp3_Error_FileMismatch,
     DfMp3_Error_Advertise,
+    // from library
+    DfMp3_Error_PacketSize = 0x81,
+    DfMp3_Error_PacketHeader,
+    DfMp3_Error_PacketChecksum,
     DfMp3_Error_General = 0xff
 };
 
@@ -303,7 +308,16 @@ private:
 
     void sendPacket(uint8_t command, uint16_t arg = 0, uint16_t sendSpaceNeeded = c_msSendSpace)
     {
-        uint8_t out[DfMp3_Packet_SIZE] = { 0x7E, 0xFF, 06, command, 00, (arg >> 8), (arg & 0x00ff), 00, 00, 0xEF };
+        uint8_t out[DfMp3_Packet_SIZE] = { 0x7E, 
+            0xFF, 
+            06, 
+            command, 
+            00, 
+            static_cast<uint8_t>(arg >> 8), 
+            static_cast<uint8_t>(arg & 0x00ff), 
+            00, 
+            00, 
+            0xEF };
 
         setChecksum(out);
 
@@ -347,6 +361,7 @@ private:
         if (read < DfMp3_Packet_SIZE)
         {
             // not enough bytes, corrupted packet
+            *argument = DfMp3_Error_PacketSize;
             return false;
         }
 
@@ -355,12 +370,14 @@ private:
             in[DfMp3_Packet_EndCode] != 0xef )
         {
             // invalid version or corrupted packet
+            *argument = DfMp3_Error_PacketHeader;
             return false;
         }
 
         if (!validateChecksum(in))
         {
-            // checksum failed, corrupted paket
+            // checksum failed, corrupted packet
+            *argument = DfMp3_Error_PacketChecksum;
             return false;
         }
 
@@ -425,9 +442,9 @@ private:
             }
             else
             {
-                if (command != 0)
+                if (replyArg != 0)
                 {
-                    T_NOTIFICATION_METHOD::OnError(DfMp3_Error_General);
+                    T_NOTIFICATION_METHOD::OnError(replyArg);
                     if (_serial.available() == 0)
                     {
                         return 0;
