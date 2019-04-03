@@ -477,6 +477,6 @@ private:
     bool validateChecksum(uint8_t* in)
     {
         uint16_t sum = calcChecksum(in);
-        return (sum == ((in[DfMp3_Packet_HiByteCheckSum] << 8) | in[DfMp3_Packet_LowByteCheckSum]));
+        return (sum == (uint16_t)((in[DfMp3_Packet_HiByteCheckSum] << 8) | in[DfMp3_Packet_LowByteCheckSum]));
     }
 };
