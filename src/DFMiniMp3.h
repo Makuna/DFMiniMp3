@@ -404,7 +404,8 @@ private:
                 {
                     switch (replyCommand)
                     {
-                    case 0x3d:
+		    case 0x3d: // micro sd
+		    case 0x3c: // usb
                         T_NOTIFICATION_METHOD::OnPlayFinished(replyArg);
                         break;
 
@@ -414,12 +415,20 @@ private:
                             _isOnline = true;
                             T_NOTIFICATION_METHOD::OnCardOnline(replyArg);
                         }
+			else if (replyArg & 0x01)
+                        {
+                            T_NOTIFICATION_METHOD::OnUSBOnline(replyArg);
+                        }
                         break;
 
                     case 0x3A:
                         if (replyArg & 0x02)
                         {
                             T_NOTIFICATION_METHOD::OnCardInserted(replyArg);
+                        }
+			else if (replyArg & 0x01)
+                        {
+                            T_NOTIFICATION_METHOD::OnUSBInserted(replyArg);
                         }
                         break;
 
@@ -428,6 +437,11 @@ private:
                         {
                             T_NOTIFICATION_METHOD::OnCardRemoved(replyArg);
                         }
+			else if (replyArg & 0x01)
+                        {
+                            T_NOTIFICATION_METHOD::OnUSBRemoved(replyArg);
+                        }
+
                         break;
 
                     case 0x40:

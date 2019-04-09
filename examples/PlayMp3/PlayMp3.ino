@@ -39,6 +39,13 @@ public:
     Serial.println(code);     
   }
 
+  static void OnUSBOnline(uint16_t code)
+  {
+    Serial.println();
+    Serial.print("USB Disk online ");
+    Serial.println(code);     
+  }
+
   static void OnCardInserted(uint16_t code)
   {
     Serial.println();
@@ -46,10 +53,24 @@ public:
     Serial.println(code); 
   }
 
+  static void OnUSBInserted(uint16_t code)
+  {
+    Serial.println();
+    Serial.print("USB Disk inserted ");
+    Serial.println(code); 
+  }
+
   static void OnCardRemoved(uint16_t code)
   {
     Serial.println();
     Serial.print("Card removed ");
+    Serial.println(code);  
+  }
+
+  static void OnUSBRemoved(uint16_t code)
+  {
+    Serial.println();
+    Serial.print("USB Disk removed ");
     Serial.println(code);  
   }
 };

@@ -31,13 +31,25 @@ public:
   {
     Serial.println("Card online ");
   }
+  static void OnUSBOnline(uint16_t code)
+  {
+    Serial.println("USB Disk online ");
+  }
   static void OnCardInserted(uint16_t code)
   {
     Serial.println("Card inserted ");
   }
+  static void OnUSBInserted(uint16_t code)
+  {
+    Serial.println("USB Disk inserted ");
+  }
   static void OnCardRemoved(uint16_t code)
   {
     Serial.println("Card removed ");
+  }
+  static void OnUSBRemoved(uint16_t code)
+  {
+    Serial.println("USB Disk removed ");
   }
 };
 
