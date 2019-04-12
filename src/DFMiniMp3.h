@@ -65,7 +65,7 @@ enum DfMp3_Eq
 
 enum DfMp3_PlaySource
 {
-    DfMp3_PlaySource_U,
+    DfMp3_PlaySource_Usb,
     DfMp3_PlaySource_Sd,
     DfMp3_PlaySource_Aux,
     DfMp3_PlaySource_Sleep,
@@ -418,7 +418,7 @@ private:
 			else if (replyArg & 0x01)
                         {
 			    _isOnline = true;
-                            T_NOTIFICATION_METHOD::OnUSBOnline(replyArg);
+                            T_NOTIFICATION_METHOD::OnUsbOnline(replyArg);
                         }
                         break;
 
@@ -429,7 +429,7 @@ private:
                         }
 			else if (replyArg & 0x01)
                         {
-                            T_NOTIFICATION_METHOD::OnUSBInserted(replyArg);
+                            T_NOTIFICATION_METHOD::OnUsbInserted(replyArg);
                         }
                         break;
 
@@ -440,7 +440,7 @@ private:
                         }
 			else if (replyArg & 0x01)
                         {
-                            T_NOTIFICATION_METHOD::OnUSBRemoved(replyArg);
+                            T_NOTIFICATION_METHOD::OnUsbRemoved(replyArg);
                         }
 
                         break;
