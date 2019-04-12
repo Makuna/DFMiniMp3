@@ -417,6 +417,7 @@ private:
                         }
 			else if (replyArg & 0x01)
                         {
+			    _isOnline = true;
                             T_NOTIFICATION_METHOD::OnUSBOnline(replyArg);
                         }
                         break;
