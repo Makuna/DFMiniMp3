@@ -65,7 +65,7 @@ enum DfMp3_Eq
 
 enum DfMp3_PlaySource
 {
-    DfMp3_PlaySource_U,
+    DfMp3_PlaySource_Usb,
     DfMp3_PlaySource_Sd,
     DfMp3_PlaySource_Aux,
     DfMp3_PlaySource_Sleep,
@@ -404,7 +404,8 @@ private:
                 {
                     switch (replyCommand)
                     {
-                    case 0x3d:
+		    case 0x3d: // micro sd
+		    case 0x3c: // usb
                         T_NOTIFICATION_METHOD::OnPlayFinished(replyArg);
                         break;
 
@@ -414,12 +415,21 @@ private:
                             _isOnline = true;
                             T_NOTIFICATION_METHOD::OnCardOnline(replyArg);
                         }
+			else if (replyArg & 0x01)
+                        {
+			    _isOnline = true;
+                            T_NOTIFICATION_METHOD::OnUsbOnline(replyArg);
+                        }
                         break;
 
                     case 0x3A:
                         if (replyArg & 0x02)
                         {
                             T_NOTIFICATION_METHOD::OnCardInserted(replyArg);
+                        }
+			else if (replyArg & 0x01)
+                        {
+                            T_NOTIFICATION_METHOD::OnUsbInserted(replyArg);
                         }
                         break;
 
@@ -428,6 +438,11 @@ private:
                         {
                             T_NOTIFICATION_METHOD::OnCardRemoved(replyArg);
                         }
+			else if (replyArg & 0x01)
+                        {
+                            T_NOTIFICATION_METHOD::OnUsbRemoved(replyArg);
+                        }
+
                         break;
 
                     case 0x40:
