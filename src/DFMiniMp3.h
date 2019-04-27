@@ -155,7 +155,7 @@ public:
     uint8_t getVolume()
     {
         sendPacket(0x43);
-        return listenForReply(0x43);
+        return static_cast<uint8_t>(listenForReply(0x43));
     }
 
     void increaseVolume()
@@ -186,7 +186,7 @@ public:
     DfMp3_PlaybackMode getPlaybackMode()
     {
         sendPacket(0x45);
-        return listenForReply(0x45);
+        return static_cast<DfMp3_PlaybackMode>(listenForReply(0x45));
     }
 
     void setRepeatPlay(bool repeat)
@@ -203,7 +203,7 @@ public:
     DfMp3_Eq getEq()
     {
         sendPacket(0x44);
-        return listenForReply(0x44);
+        return static_cast<DfMp3_Eq>(listenForReply(0x44));
     }
 
 
