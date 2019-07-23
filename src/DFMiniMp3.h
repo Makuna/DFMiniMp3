@@ -14,7 +14,7 @@ it under the terms of the GNU Lesser General Public License as
 published by the Free Software Foundation, either version 3 of
 the License, or (at your option) any later version.
 
-NeoPixelBus is distributed in the hope that it will be useful,
+DFMiniMp3 is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU Lesser General Public License for more details.
@@ -36,7 +36,8 @@ enum DfMp3_Error
     DfMp3_Error_FileMismatch,
     DfMp3_Error_Advertise,
     // from library
-    DfMp3_Error_PacketSize = 0x81,
+	DfMp3_Error_RxTimeout = 0x81,
+	DfMp3_Error_PacketSize,
     DfMp3_Error_PacketHeader,
     DfMp3_Error_PacketChecksum,
     DfMp3_Error_General = 0xff
@@ -308,15 +309,15 @@ private:
 
     void sendPacket(uint8_t command, uint16_t arg = 0, uint16_t sendSpaceNeeded = c_msSendSpace)
     {
-        uint8_t out[DfMp3_Packet_SIZE] = { 0x7E, 
-            0xFF, 
-            06, 
-            command, 
-            00, 
-            static_cast<uint8_t>(arg >> 8), 
-            static_cast<uint8_t>(arg & 0x00ff), 
-            00, 
-            00, 
+        uint8_t out[DfMp3_Packet_SIZE] = { 0x7E,
+            0xFF,
+            06,
+            command,
+            00,
+            static_cast<uint8_t>(arg >> 8),
+            static_cast<uint8_t>(arg & 0x00ff),
+            00,
+            00,
             0xEF };
 
         setChecksum(out);
@@ -344,7 +345,7 @@ private:
         // init our out args always
         *command = 0;
         *argument = 0;
-        
+
         // try to sync our reads to the packet start
         do
         {
@@ -353,6 +354,7 @@ private:
             if (read != 1)
             {
                 // nothing read
+				*argument = DfMp3_Error_RxTimeout;
                 return false;
             }
         } while (in[DfMp3_Packet_StartCode] != 0x7e);
@@ -367,7 +369,7 @@ private:
 
         if (in[DfMp3_Packet_Version] != 0xFF ||
             in[DfMp3_Packet_Length] != 0x06 ||
-            in[DfMp3_Packet_EndCode] != 0xef )
+            in[DfMp3_Packet_EndCode] != 0xef)
         {
             // invalid version or corrupted packet
             *argument = DfMp3_Error_PacketHeader;
@@ -404,8 +406,8 @@ private:
                 {
                     switch (replyCommand)
                     {
-		    case 0x3d: // micro sd
-		    case 0x3c: // usb
+                    case 0x3d: // micro sd
+                    case 0x3c: // usb
                         T_NOTIFICATION_METHOD::OnPlayFinished(replyArg);
                         break;
 
@@ -415,9 +417,9 @@ private:
                             _isOnline = true;
                             T_NOTIFICATION_METHOD::OnCardOnline(replyArg);
                         }
-			else if (replyArg & 0x01)
+                        else if (replyArg & 0x01)
                         {
-			    _isOnline = true;
+                            _isOnline = true;
                             T_NOTIFICATION_METHOD::OnUsbOnline(replyArg);
                         }
                         break;
@@ -427,7 +429,7 @@ private:
                         {
                             T_NOTIFICATION_METHOD::OnCardInserted(replyArg);
                         }
-			else if (replyArg & 0x01)
+                        else if (replyArg & 0x01)
                         {
                             T_NOTIFICATION_METHOD::OnUsbInserted(replyArg);
                         }
@@ -438,11 +440,10 @@ private:
                         {
                             T_NOTIFICATION_METHOD::OnCardRemoved(replyArg);
                         }
-			else if (replyArg & 0x01)
+                        else if (replyArg & 0x01)
                         {
                             T_NOTIFICATION_METHOD::OnUsbRemoved(replyArg);
                         }
-
                         break;
 
                     case 0x40:
