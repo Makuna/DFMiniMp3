@@ -36,8 +36,8 @@ enum DfMp3_Error
     DfMp3_Error_FileMismatch,
     DfMp3_Error_Advertise,
     // from library
-	DfMp3_Error_RxTimeout = 0x81,
-	DfMp3_Error_PacketSize,
+    DfMp3_Error_RxTimeout = 0x81,
+    DfMp3_Error_PacketSize,
     DfMp3_Error_PacketHeader,
     DfMp3_Error_PacketChecksum,
     DfMp3_Error_General = 0xff
@@ -143,6 +143,7 @@ public:
 
     uint16_t getCurrentTrack()
     {
+        drainResponses();
         sendPacket(0x4c);
         return listenForReply(0x4c);
     }
@@ -155,6 +156,7 @@ public:
 
     uint8_t getVolume()
     {
+        drainResponses();
         sendPacket(0x43);
         return static_cast<uint8_t>(listenForReply(0x43));
     }
@@ -186,6 +188,7 @@ public:
 
     DfMp3_PlaybackMode getPlaybackMode()
     {
+        drainResponses();
         sendPacket(0x45);
         return static_cast<DfMp3_PlaybackMode>(listenForReply(0x45));
     }
@@ -203,6 +206,7 @@ public:
 
     DfMp3_Eq getEq()
     {
+        drainResponses();
         sendPacket(0x44);
         return static_cast<DfMp3_Eq>(listenForReply(0x44));
     }
@@ -241,24 +245,28 @@ public:
 
     uint16_t getStatus()
     {
+        drainResponses();
         sendPacket(0x42);
         return listenForReply(0x42);
     }
 
     uint16_t getFolderTrackCount(uint16_t folder)
     {
+        drainResponses();
         sendPacket(0x4e, folder);
         return listenForReply(0x4e);
     }
 
     uint16_t getTotalTrackCount()
     {
+        drainResponses();
         sendPacket(0x48);
         return listenForReply(0x48);
     }
 
     uint16_t getTotalFolderCount()
     {
+        drainResponses();
         sendPacket(0x4F);
         return listenForReply(0x4F);
     }
@@ -307,6 +315,14 @@ private:
     uint16_t _lastSendSpace;
     bool _isOnline;
 
+    void drainResponses()
+    {
+        while (_serial.available() > 0)
+        {
+            listenForReply(0x00);
+        }
+    }
+
     void sendPacket(uint8_t command, uint16_t arg = 0, uint16_t sendSpaceNeeded = c_msSendSpace)
     {
         uint8_t out[DfMp3_Packet_SIZE] = { 0x7E,
@@ -354,7 +370,7 @@ private:
             if (read != 1)
             {
                 // nothing read
-				*argument = DfMp3_Error_RxTimeout;
+                *argument = DfMp3_Error_RxTimeout;
                 return false;
             }
         } while (in[DfMp3_Packet_StartCode] != 0x7e);
@@ -448,6 +464,7 @@ private:
 
                     case 0x40:
                         T_NOTIFICATION_METHOD::OnError(replyArg);
+                        return 0;
                         break;
 
                     default:
