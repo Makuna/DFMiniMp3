@@ -282,6 +282,16 @@ public:
         sendPacket(0x15);
     }
 
+    void enableDac()
+    {
+        sendPacket(0x1A, 0x00);
+    }
+
+    void disableDac()
+    {
+        sendPacket(0x1A, 0x01);
+    }
+
 private:
     static const uint16_t c_msSendSpace = 50;
 
