@@ -187,6 +187,7 @@ public:
     }
 
     // sd:/##/*
+    // 0-99
     void loopFolder(uint8_t folder)
     {
         sendPacket(0x17, folder);
