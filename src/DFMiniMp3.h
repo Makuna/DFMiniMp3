@@ -186,6 +186,12 @@ public:
         sendPacket(0x08, globalTrack);
     }
 
+    // sd:/##/*
+    void loopFolder(uint8_t folder)
+    {
+        sendPacket(0x17, folder);
+    }
+
     DfMp3_PlaybackMode getPlaybackMode()
     {
         drainResponses();
@@ -280,6 +286,16 @@ public:
     void stopAdvertisement()
     {
         sendPacket(0x15);
+    }
+
+    void enableDac()
+    {
+        sendPacket(0x1A, 0x03);
+    }
+
+    void disableDac()
+    {
+        sendPacket(0x1A, 0x01);
     }
 
 private:
