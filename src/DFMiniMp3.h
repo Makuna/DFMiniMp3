@@ -291,7 +291,7 @@ public:
 
     void enableDac()
     {
-        sendPacket(0x1A, 0x03);
+        sendPacket(0x1A, 0x00);
     }
 
     void disableDac()

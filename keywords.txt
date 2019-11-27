@@ -45,7 +45,9 @@ getFolderTrackCount	KEYWORD2
 getTotalTrackCount	KEYWORD2
 getTotalFolderCount	KEYWORD2
 playAdvertisement	KEYWORD2
-stopAdvertisement	KEYWORD2							
+stopAdvertisement	KEYWORD2
+enableDac	KEYWORD2
+disableDac	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
