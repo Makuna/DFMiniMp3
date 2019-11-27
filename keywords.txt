@@ -30,6 +30,7 @@ getVolume	KEYWORD2
 increaseVolume	KEYWORD2
 decreaseVolume	KEYWORD2
 loopGlobalTrack	KEYWORD2
+loopFolder	KEYWORD2
 getPlaybackMode	KEYWORD2
 setRepeatPlay	KEYWORD2
 setEq	KEYWORD2
