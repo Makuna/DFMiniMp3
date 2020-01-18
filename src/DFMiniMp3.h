@@ -186,6 +186,13 @@ public:
         sendPacket(0x08, globalTrack);
     }
 
+    // sd:/##/*
+    // 0-99
+    void loopFolder(uint8_t folder)
+    {
+        sendPacket(0x17, folder);
+    }
+
     DfMp3_PlaybackMode getPlaybackMode()
     {
         drainResponses();
