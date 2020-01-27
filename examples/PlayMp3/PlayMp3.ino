@@ -25,53 +25,46 @@ public:
     Serial.println(errorCode);
   }
 
-  static void OnPlayFinished(uint16_t globalTrack)
+  static void OnPlayFinished(DfMp3_PlaySource source, uint16_t track)
   {
-    Serial.println();
     Serial.print("Play finished for #");
-    Serial.println(globalTrack);   
+    Serial.println(track);  
   }
 
-  static void OnCardOnline(uint16_t code)
+  static void OnPlaySourceOnline(DfMp3_PlaySource source)
   {
-    Serial.println();
-    Serial.print("Card online ");
-    Serial.println(code);     
+    if (source & DfMp3_PlaySource_Sd) 
+    {
+        Serial.println("Card online ");
+    }
+    if (source & DfMp3_PlaySource_Usb) 
+    {
+        Serial.println("USB Disk online ");
+    }
   }
 
-  static void OnUsbOnline(uint16_t code)
+  static void OnPlaySourceInserted(DfMp3_PlaySource source)
   {
-    Serial.println();
-    Serial.print("USB Disk online ");
-    Serial.println(code);     
+    if (source & DfMp3_PlaySource_Sd) 
+    {
+        Serial.println("Card inserted ");
+    }
+    if (source & DfMp3_PlaySource_Usb) 
+    {
+        Serial.println("USB Disk inserted ");
+    }
   }
 
-  static void OnCardInserted(uint16_t code)
+  static void OnPlaySourceRemoved(DfMp3_PlaySource source)
   {
-    Serial.println();
-    Serial.print("Card inserted ");
-    Serial.println(code); 
-  }
-
-  static void OnUsbInserted(uint16_t code)
-  {
-    Serial.println();
-    Serial.print("USB Disk inserted ");
-    Serial.println(code); 
-  }
-
-  static void OnCardRemoved(uint16_t code)
-  {
-    Serial.println();
-    Serial.print("Card removed ");
-    Serial.println(code);  
-  }
-
-  static void OnUsbRemoved(uint16_t code)
-  {
-    Serial.println();
-    Serial.print("USB Disk removed ");
-    Serial.println(code);  
+    if (source & DfMp3_PlaySource_Sd) 
+    {
+        Serial.println("Card removed ");
+    }
+    if (source & DfMp3_PlaySource_Usb) 
+    {
+        Serial.println("USB Disk removed ");
+    }
   }
 };
 
@@ -98,7 +91,7 @@ void setup()
   Serial.println(volume);
   mp3.setVolume(24);
   
-  uint16_t count = mp3.getTotalTrackCount();
+  uint16_t count = mp3.getTotalTrackCount(DfMp3_PlaySource_Sd);
   Serial.print("files ");
   Serial.println(count);
   

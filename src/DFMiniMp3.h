@@ -63,14 +63,14 @@ enum DfMp3_Eq
     DfMp3_Eq_Bass
 };
 
-
-enum DfMp3_PlaySource
+enum DfMp3_PlaySource // bitfield - more than one can be set
 {
-    DfMp3_PlaySource_Usb,
-    DfMp3_PlaySource_Sd,
-    DfMp3_PlaySource_Aux,
-    DfMp3_PlaySource_Sleep,
-    DfMp3_PlaySource_Flash
+    DfMp3_PlaySource_Usb = 0x01,
+    DfMp3_PlaySource_Sd = 0x02,
+    DfMp3_PlaySource_Pc = 0x04, //  ?? Aux?
+    DfMp3_PlaySource_Flash = 0x08,
+
+    DfMp3_PlaySource_CmdSleep = 0x05 // used only for SetPlaySouce
 };
 
 
@@ -97,6 +97,16 @@ public:
         {
             listenForReply(0x00);
         }
+    }
+
+    // Does not work with all models.
+    // YX5200-24SS - sends reply
+    // MH2024K-24SS - sends NO reply --> results in error notification
+    DfMp3_PlaySource getPlaySources()
+    {
+        drainResponses();
+        sendPacket(0x3f);
+        return listenForReply(0x3f);
     }
 
     // the track as enumerated across all folders
@@ -141,11 +151,30 @@ public:
         sendPacket(0x02);
     }
 
-    uint16_t getCurrentTrack()
+    uint16_t getCurrentTrack(DfMp3_PlaySource source)
     {
         drainResponses();
-        sendPacket(0x4c);
-        return listenForReply(0x4c);
+
+        uint8_t command;
+
+        switch (source)
+        {
+        case DfMp3_PlaySource_Usb:
+            command = 0x4b;
+            break;
+        case DfMp3_PlaySource_Sd:
+            command = 0x4c;
+            break;
+        case DfMp3_PlaySource_Flash:
+            command = 0x4d;
+            break;
+        default:
+            command = 0x4c;
+            break;
+        }
+
+        sendPacket(command);
+        return listenForReply(command);
     }
 
     // 0- 30
@@ -264,11 +293,30 @@ public:
         return listenForReply(0x4e);
     }
 
-    uint16_t getTotalTrackCount()
+    uint16_t getTotalTrackCount(DfMp3_PlaySource source)
     {
         drainResponses();
-        sendPacket(0x48);
-        return listenForReply(0x48);
+
+        uint8_t command;
+
+        switch (source)
+        {
+        case DfMp3_PlaySource_Usb:
+            command = 0x47;
+            break;
+        case DfMp3_PlaySource_Sd:
+            command = 0x48;
+            break;
+        case DfMp3_PlaySource_Flash:
+            command = 0x49;
+            break;
+        default:
+            command = 0x48;
+            break;
+        }
+
+        sendPacket(command);
+        return listenForReply(command);
     }
 
     uint16_t getTotalFolderCount()
@@ -439,44 +487,29 @@ private:
                 {
                     switch (replyCommand)
                     {
-                    case 0x3d: // micro sd
                     case 0x3c: // usb
-                        T_NOTIFICATION_METHOD::OnPlayFinished(replyArg);
+                        T_NOTIFICATION_METHOD::OnPlayFinished(DfMp3_PlaySource_Usb, replyArg);
+                        break;
+
+                    case 0x3d: // micro sd
+                        T_NOTIFICATION_METHOD::OnPlayFinished(DfMp3_PlaySource_Sd, replyArg);
+                        break;
+
+                    case 0x3e: // flash
+                        T_NOTIFICATION_METHOD::OnPlayFinished(DfMp3_PlaySource_Flash, replyArg);
                         break;
 
                     case 0x3F:
-                        if (replyArg & 0x02)
-                        {
-                            _isOnline = true;
-                            T_NOTIFICATION_METHOD::OnCardOnline(replyArg);
-                        }
-                        else if (replyArg & 0x01)
-                        {
-                            _isOnline = true;
-                            T_NOTIFICATION_METHOD::OnUsbOnline(replyArg);
-                        }
+                        _isOnline = true;
+                        T_NOTIFICATION_METHOD::OnPlaySourceOnline(static_cast<DfMp3_PlaySource>(replyArg));
                         break;
 
                     case 0x3A:
-                        if (replyArg & 0x02)
-                        {
-                            T_NOTIFICATION_METHOD::OnCardInserted(replyArg);
-                        }
-                        else if (replyArg & 0x01)
-                        {
-                            T_NOTIFICATION_METHOD::OnUsbInserted(replyArg);
-                        }
+                        T_NOTIFICATION_METHOD::OnPlaySourceInserted(static_cast<DfMp3_PlaySource>(replyArg));
                         break;
 
                     case 0x3B:
-                        if (replyArg & 0x02)
-                        {
-                            T_NOTIFICATION_METHOD::OnCardRemoved(replyArg);
-                        }
-                        else if (replyArg & 0x01)
-                        {
-                            T_NOTIFICATION_METHOD::OnUsbRemoved(replyArg);
-                        }
+                        T_NOTIFICATION_METHOD::OnPlaySourceRemoved(static_cast<DfMp3_PlaySource>(replyArg));
                         break;
 
                     case 0x40:
