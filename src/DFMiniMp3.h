@@ -63,14 +63,21 @@ enum DfMp3_Eq
     DfMp3_Eq_Bass
 };
 
-enum DfMp3_PlaySource // bitfield - more than one can be set
+enum DfMp3_PlaySource // value - only one can be set
 {
-    DfMp3_PlaySource_Usb = 0x01,
-    DfMp3_PlaySource_Sd = 0x02,
-    DfMp3_PlaySource_Pc = 0x04, //  ?? Aux?
-    DfMp3_PlaySource_Flash = 0x08,
+    DfMp3_PlaySource_Usb = 1,
+    DfMp3_PlaySource_Sd,
+    DfMp3_PlaySource_Aux,
+    DfMp3_PlaySource_Sleep,
+    DfMp3_PlaySource_Flash
+};
 
-    DfMp3_PlaySource_CmdSleep = 0x05 // used only for SetPlaySouce
+enum DfMp3_PlaySources // bitfield - more than one can be set
+{
+    DfMp3_PlaySources_Usb = 0x01,
+    DfMp3_PlaySources_Sd = 0x02,
+    DfMp3_PlaySources_Pc = 0x04, 
+    DfMp3_PlaySources_Flash = 0x08,
 };
 
 
@@ -102,11 +109,11 @@ public:
     // Does not work with all models.
     // YX5200-24SS - sends reply
     // MH2024K-24SS - sends NO reply --> results in error notification
-    DfMp3_PlaySource getPlaySources()
+    DfMp3_PlaySources getPlaySources()
     {
         drainResponses();
         sendPacket(0x3f);
-        return listenForReply(0x3f);
+        return static_cast<DfMp3_PlaySources>(listenForReply(0x3f));
     }
 
     // the track as enumerated across all folders
@@ -488,28 +495,28 @@ private:
                     switch (replyCommand)
                     {
                     case 0x3c: // usb
-                        T_NOTIFICATION_METHOD::OnPlayFinished(DfMp3_PlaySource_Usb, replyArg);
+                        T_NOTIFICATION_METHOD::OnPlayFinished(DfMp3_PlaySources_Usb, replyArg);
                         break;
 
                     case 0x3d: // micro sd
-                        T_NOTIFICATION_METHOD::OnPlayFinished(DfMp3_PlaySource_Sd, replyArg);
+                        T_NOTIFICATION_METHOD::OnPlayFinished(DfMp3_PlaySources_Sd, replyArg);
                         break;
 
                     case 0x3e: // flash
-                        T_NOTIFICATION_METHOD::OnPlayFinished(DfMp3_PlaySource_Flash, replyArg);
+                        T_NOTIFICATION_METHOD::OnPlayFinished(DfMp3_PlaySources_Flash, replyArg);
                         break;
 
                     case 0x3F:
                         _isOnline = true;
-                        T_NOTIFICATION_METHOD::OnPlaySourceOnline(static_cast<DfMp3_PlaySource>(replyArg));
+                        T_NOTIFICATION_METHOD::OnPlaySourceOnline(static_cast<DfMp3_PlaySources>(replyArg));
                         break;
 
                     case 0x3A:
-                        T_NOTIFICATION_METHOD::OnPlaySourceInserted(static_cast<DfMp3_PlaySource>(replyArg));
+                        T_NOTIFICATION_METHOD::OnPlaySourceInserted(static_cast<DfMp3_PlaySources>(replyArg));
                         break;
 
                     case 0x3B:
-                        T_NOTIFICATION_METHOD::OnPlaySourceRemoved(static_cast<DfMp3_PlaySource>(replyArg));
+                        T_NOTIFICATION_METHOD::OnPlaySourceRemoved(static_cast<DfMp3_PlaySources>(replyArg));
                         break;
 
                     case 0x40:
