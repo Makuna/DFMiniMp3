@@ -22,40 +22,40 @@ public:
     Serial.print("Com Error ");
     Serial.println(errorCode);
   }
-  static void OnPlayFinished(DfMp3_PlaySource source, uint16_t track)
+  static void OnPlayFinished(DfMp3_PlaySources source, uint16_t track)
   {
     Serial.print("Play finished for #");
     Serial.println(track);  
   }
-  static void OnPlaySourceOnline(DfMp3_PlaySource source)
+  static void OnPlaySourceOnline(DfMp3_PlaySources source)
   {
-    if (source & DfMp3_PlaySource_Sd) 
+    if (source & DfMp3_PlaySources_Sd) 
     {
         Serial.println("Card online ");
     }
-    if (source & DfMp3_PlaySource_Usb) 
+    if (source & DfMp3_PlaySources_Usb) 
     {
         Serial.println("USB Disk online ");
     }
   }
-  static void OnPlaySourceInserted(DfMp3_PlaySource source)
+  static void OnPlaySourceInserted(DfMp3_PlaySources source)
   {
-    if (source & DfMp3_PlaySource_Sd) 
+    if (source & DfMp3_PlaySources_Sd) 
     {
         Serial.println("Card inserted ");
     }
-    if (source & DfMp3_PlaySource_Usb) 
+    if (source & DfMp3_PlaySources_Usb) 
     {
         Serial.println("USB Disk inserted ");
     }
   }
-  static void OnPlaySourceRemoved(DfMp3_PlaySource source)
+  static void OnPlaySourceRemoved(DfMp3_PlaySources source)
   {
-    if (source & DfMp3_PlaySource_Sd) 
+    if (source & DfMp3_PlaySources_Sd) 
     {
         Serial.println("Card removed ");
     }
-    if (source & DfMp3_PlaySource_Usb) 
+    if (source & DfMp3_PlaySources_Usb) 
     {
         Serial.println("USB Disk removed ");
     }
