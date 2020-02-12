@@ -87,7 +87,7 @@ public:
     DFMiniMp3(T_SERIAL_METHOD& serial) :
         _serial(serial),
         _lastSendSpace(c_msSendSpace),
-        _isOnline(true)
+        _isOnline(false)
     {
     }
 
@@ -354,6 +354,11 @@ public:
         sendPacket(0x1A, 0x01);
     }
 
+    bool isOnline() const
+    {
+        return _isOnline;
+    }
+
 private:
     static const uint16_t c_msSendSpace = 50;
 
@@ -411,7 +416,7 @@ private:
         setChecksum(out);
 
         // wait for spacing since last send
-        while (((millis() - _lastSend) < _lastSendSpace) || !_isOnline)
+        while (((millis() - _lastSend) < _lastSendSpace))
         {
             // check for event messages from the device while
             // we wait
@@ -439,10 +444,12 @@ private:
         {
             // we use readBytes as it gives us the standard timeout
             read = _serial.readBytes(&(in[DfMp3_Packet_StartCode]), 1);
+
             if (read != 1)
             {
                 // nothing read
                 *argument = DfMp3_Error_RxTimeout;
+
                 return false;
             }
         } while (in[DfMp3_Packet_StartCode] != 0x7e);
@@ -512,10 +519,12 @@ private:
                         break;
 
                     case 0x3A:
+                        _isOnline = true;
                         T_NOTIFICATION_METHOD::OnPlaySourceInserted(static_cast<DfMp3_PlaySources>(replyArg));
                         break;
 
                     case 0x3B:
+                        _isOnline = true;
                         T_NOTIFICATION_METHOD::OnPlaySourceRemoved(static_cast<DfMp3_PlaySources>(replyArg));
                         break;
 
