@@ -10,6 +10,7 @@ DFMiniMp3	KEYWORD1
 DfMp3_PlaybackMode	KEYWORD1
 DfMp3_Eq	KEYWORD1
 DfMp3_PlaySource	KEYWORD1
+DfMp3_PlaySources	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
@@ -17,6 +18,7 @@ DfMp3_PlaySource	KEYWORD1
 
 begin	KEYWORD2
 loop	KEYWORD2
+getPlaySources	KEYWORD2
 playGlobalTrack	KEYWORD2
 playMp3FolderTrack	KEYWORD2
 playFolderTrack	KEYWORD2
@@ -49,6 +51,7 @@ playAdvertisement	KEYWORD2
 stopAdvertisement	KEYWORD2
 enableDac	KEYWORD2
 disableDac	KEYWORD2
+isOnline	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
@@ -64,8 +67,12 @@ DfMp3_Eq_Rock	LITERAL1
 DfMp3_Eq_Jazz	LITERAL1
 DfMp3_Eq_Classic	LITERAL1
 DfMp3_Eq_Bass	LITERAL1
-DfMp3_PlaySource_U	LITERAL1
+DfMp3_PlaySource_Usb	LITERAL1
 DfMp3_PlaySource_Sd	LITERAL1
 DfMp3_PlaySource_Aux	LITERAL1
 DfMp3_PlaySource_Sleep	LITERAL1
 DfMp3_PlaySource_Flash	LITERAL1
+DfMp3_PlaySources_Usb	LITERAL1
+DfMp3_PlaySources_Sd	LITERAL1
+DfMp3_PlaySources_Pc	LITERAL1
+DfMp3_PlaySources_Flash	LITERAL1
