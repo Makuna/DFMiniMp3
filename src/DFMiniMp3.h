@@ -236,11 +236,15 @@ public:
         return static_cast<DfMp3_PlaybackMode>(listenForReply(0x45));
     }
 
-    void setRepeatPlay(bool repeat)
+    void setRepeatPlayAllInRoot(bool repeat)
     {
         sendPacket(0x11, !!repeat);
     }
 
+    void setRepeatPlayCurrentTrack(bool repeat)
+    {
+        sendPacket(0x19, !repeat);
+    }
 
     void setEq(DfMp3_Eq eq)
     {
