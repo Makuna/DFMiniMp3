@@ -91,9 +91,9 @@ public:
     {
     }
 
-    void begin()
+    void begin(unsigned long baud = 9600)
     {
-        _serial.begin(9600);
+        _serial.begin(baud);
         _serial.setTimeout(10000);
         _lastSend = millis();
     }
@@ -128,7 +128,9 @@ public:
         sendPacket(0x12, track);
     }
 
-    // sd:/###/###track name
+    // older devices: sd:/###/###track name
+    // newer devices: sd:/##/###track name
+    // folder and track numbers are zero padded
     void playFolderTrack(uint8_t folder, uint8_t track)
     {
         uint16_t arg = (folder << 8) | track;
@@ -158,7 +160,7 @@ public:
         sendPacket(0x02);
     }
 
-    uint16_t getCurrentTrack(DfMp3_PlaySource source)
+    uint16_t getCurrentTrack(DfMp3_PlaySource source = DfMp3_PlaySource_Sd)
     {
         drainResponses();
 
