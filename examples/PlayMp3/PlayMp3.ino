@@ -11,6 +11,24 @@
 #include <SoftwareSerial.h>
 #include <DFMiniMp3.h>
 
+// forward declare the notify class, just the name
+//
+class Mp3Notify; 
+
+// define a handy type using serial and our notify class
+//
+typedef DFMiniMp3<HardwareSerial, Mp3Notify> DfMp3; 
+
+// instance a DfMp3 object, 
+//
+DfMp3 dfmp3(Serial1);
+
+// Some arduino boards only have one hardware serial port, so a software serial port is needed instead.
+// comment out the above definitions and use these
+//SoftwareSerial secondarySerial(10, 11); // RX, TX
+//typedef DFMiniMp3<SoftwareSerial, Mp3Notify> DfMp3;
+// DfMp3 dfmp3(secondarySerial);
+
 // implement a notification class,
 // its member methods will get called 
 //
@@ -33,41 +51,31 @@ public:
     }
     Serial.println(action);
   }
-  static void OnError(uint16_t errorCode)
+  static void OnError(DfMp3& mp3, uint16_t errorCode)
   {
     // see DfMp3_Error for code meaning
     Serial.println();
     Serial.print("Com Error ");
     Serial.println(errorCode);
   }
-  static void OnPlayFinished(DfMp3_PlaySources source, uint16_t track)
+  static void OnPlayFinished(DfMp3& mp3, DfMp3_PlaySources source, uint16_t track)
   {
     Serial.print("Play finished for #");
     Serial.println(track);  
   }
-  static void OnPlaySourceOnline(DfMp3_PlaySources source)
+  static void OnPlaySourceOnline(DfMp3& mp3, DfMp3_PlaySources source)
   {
     PrintlnSourceAction(source, "online");
   }
-  static void OnPlaySourceInserted(DfMp3_PlaySources source)
+  static void OnPlaySourceInserted(DfMp3& mp3, DfMp3_PlaySources source)
   {
     PrintlnSourceAction(source, "inserted");
   }
-  static void OnPlaySourceRemoved(DfMp3_PlaySources source)
+  static void OnPlaySourceRemoved(DfMp3& mp3, DfMp3_PlaySources source)
   {
     PrintlnSourceAction(source, "removed");
   }
 };
-
-// instance a DFMiniMp3 object, 
-// defined with the above notification class and the hardware serial class
-//
-DFMiniMp3<HardwareSerial, Mp3Notify> mp3(Serial1);
-
-// Some arduino boards only have one hardware serial port, so a software serial port is needed instead.
-// comment out the above definition and uncomment these lines
-//SoftwareSerial secondarySerial(10, 11); // RX, TX
-//DFMiniMp3<SoftwareSerial, Mp3Notify> mp3(secondarySerial);
 
 void setup() 
 {
@@ -75,14 +83,14 @@ void setup()
 
   Serial.println("initializing...");
   
-  mp3.begin();
+  dfmp3.begin();
 
-  uint16_t volume = mp3.getVolume();
+  uint16_t volume = dfmp3.getVolume();
   Serial.print("volume ");
   Serial.println(volume);
-  mp3.setVolume(24);
+  dfmp3.setVolume(24);
   
-  uint16_t count = mp3.getTotalTrackCount(DfMp3_PlaySource_Sd);
+  uint16_t count = dfmp3.getTotalTrackCount(DfMp3_PlaySource_Sd);
   Serial.print("files ");
   Serial.println(count);
   
@@ -95,9 +103,10 @@ void waitMilliseconds(uint16_t msWait)
   
   while ((millis() - start) < msWait)
   {
-    // calling mp3.loop() periodically allows for notifications 
+    // if you have loops with delays, its important to 
+    // call dfmp3.loop() periodically so it allows for notifications 
     // to be handled without interrupts
-    mp3.loop(); 
+    dfmp3.loop(); 
     delay(1);
   }
 }
@@ -105,17 +114,17 @@ void waitMilliseconds(uint16_t msWait)
 void loop() 
 {
   Serial.println("track 1"); 
-  mp3.playMp3FolderTrack(1);  // sd:/mp3/0001.mp3
+  dfmp3.playMp3FolderTrack(1);  // sd:/mp3/0001.mp3
   
   waitMilliseconds(5000);
   
   Serial.println("track 2"); 
-  mp3.playMp3FolderTrack(2); // sd:/mp3/0002.mp3
+  dfmp3.playMp3FolderTrack(2); // sd:/mp3/0002.mp3
   
   waitMilliseconds(5000);
   
   Serial.println("track 3");
-  mp3.playMp3FolderTrack(3); // sd:/mp3/0002.mp3
+  dfmp3.playMp3FolderTrack(3); // sd:/mp3/0002.mp3
   
   waitMilliseconds(5000); 
 }
