@@ -508,34 +508,34 @@ private:
                     switch (replyCommand)
                     {
                     case 0x3c: // usb
-                        T_NOTIFICATION_METHOD::OnPlayFinished(DfMp3_PlaySources_Usb, replyArg);
+                        T_NOTIFICATION_METHOD::OnPlayFinished(*this, DfMp3_PlaySources_Usb, replyArg);
                         break;
 
                     case 0x3d: // micro sd
-                        T_NOTIFICATION_METHOD::OnPlayFinished(DfMp3_PlaySources_Sd, replyArg);
+                        T_NOTIFICATION_METHOD::OnPlayFinished(*this, DfMp3_PlaySources_Sd, replyArg);
                         break;
 
                     case 0x3e: // flash
-                        T_NOTIFICATION_METHOD::OnPlayFinished(DfMp3_PlaySources_Flash, replyArg);
+                        T_NOTIFICATION_METHOD::OnPlayFinished(*this, DfMp3_PlaySources_Flash, replyArg);
                         break;
 
                     case 0x3F:
                         _isOnline = true;
-                        T_NOTIFICATION_METHOD::OnPlaySourceOnline(static_cast<DfMp3_PlaySources>(replyArg));
+                        T_NOTIFICATION_METHOD::OnPlaySourceOnline(*this, static_cast<DfMp3_PlaySources>(replyArg));
                         break;
 
                     case 0x3A:
                         _isOnline = true;
-                        T_NOTIFICATION_METHOD::OnPlaySourceInserted(static_cast<DfMp3_PlaySources>(replyArg));
+                        T_NOTIFICATION_METHOD::OnPlaySourceInserted(*this, static_cast<DfMp3_PlaySources>(replyArg));
                         break;
 
                     case 0x3B:
                         _isOnline = true;
-                        T_NOTIFICATION_METHOD::OnPlaySourceRemoved(static_cast<DfMp3_PlaySources>(replyArg));
+                        T_NOTIFICATION_METHOD::OnPlaySourceRemoved(*this, static_cast<DfMp3_PlaySources>(replyArg));
                         break;
 
                     case 0x40:
-                        T_NOTIFICATION_METHOD::OnError(replyArg);
+                        T_NOTIFICATION_METHOD::OnError(*this, replyArg);
                         return 0;
                         break;
 
@@ -549,7 +549,7 @@ private:
             {
                 if (replyArg != 0)
                 {
-                    T_NOTIFICATION_METHOD::OnError(replyArg);
+                    T_NOTIFICATION_METHOD::OnError(*this, replyArg);
                     if (_serial.available() == 0)
                     {
                         return 0;
