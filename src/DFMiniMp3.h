@@ -84,7 +84,7 @@ enum DfMp3_PlaySources // bitfield - more than one can be set
 template<class T_SERIAL_METHOD, class T_NOTIFICATION_METHOD> class DFMiniMp3
 {
 public:
-    DFMiniMp3(T_SERIAL_METHOD& serial) :
+    explicit DFMiniMp3(T_SERIAL_METHOD& serial) :
         _serial(serial),
         _lastSendSpace(c_msSendSpace),
         _isOnline(false)
@@ -394,7 +394,7 @@ private:
 
 
     T_SERIAL_METHOD& _serial;
-    uint32_t _lastSend;
+    uint32_t _lastSend; // not initialized as agreed in issue #63
     uint16_t _lastSendSpace;
     bool _isOnline;
 
