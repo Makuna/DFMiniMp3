@@ -212,8 +212,7 @@ public:
     DfMp3_PlaySources getPlaySources()
     {
         drainResponses();
-        sendPacket(0x3f);
-        return static_cast<DfMp3_PlaySources>(listenForReply(0x3f));
+        return static_cast<DfMp3_PlaySources>(sendAndListenForReply(0x3f));
     }
 
     // the track as enumerated across all folders
@@ -282,8 +281,7 @@ public:
             break;
         }
 
-        sendPacket(command);
-        return listenForReply(command);
+        return sendAndListenForReply(command);
     }
 
     // 0- 30
@@ -294,9 +292,7 @@ public:
 
     uint8_t getVolume()
     {
-        drainResponses();
-        sendPacket(0x43);
-        return static_cast<uint8_t>(listenForReply(0x43));
+        return sendAndListenForReply(0x43);
     }
 
     void increaseVolume()
@@ -334,8 +330,7 @@ public:
     DfMp3_PlaybackMode getPlaybackMode()
     {
         drainResponses();
-        sendPacket(0x45);
-        return static_cast<DfMp3_PlaybackMode>(listenForReply(0x45));
+        return static_cast<DfMp3_PlaybackMode>(sendAndListenForReply(0x45));
     }
 
     void setRepeatPlayAllInRoot(bool repeat)
@@ -356,8 +351,7 @@ public:
     DfMp3_Eq getEq()
     {
         drainResponses();
-        sendPacket(0x44);
-        return static_cast<DfMp3_Eq>(listenForReply(0x44));
+        return static_cast<DfMp3_Eq>(sendAndListenForReply(0x44));
     }
 
     void setPlaybackSource(DfMp3_PlaySource source)
@@ -394,15 +388,13 @@ public:
     uint16_t getStatus()
     {
         drainResponses();
-        sendPacket(0x42);
-        return listenForReply(0x42);
+        return sendAndListenForReply(0x42);
     }
 
     uint16_t getFolderTrackCount(uint16_t folder)
     {
         drainResponses();
-        sendPacket(0x4e, folder);
-        return listenForReply(0x4e);
+        return sendAndListenForReply(0x4e, folder);
     }
 
     uint16_t getTotalTrackCount(DfMp3_PlaySource source)
@@ -427,15 +419,13 @@ public:
             break;
         }
 
-        sendPacket(command);
-        return listenForReply(command);
+        return sendAndListenForReply(command);
     }
 
     uint16_t getTotalFolderCount()
     {
         drainResponses();
-        sendPacket(0x4F);
-        return listenForReply(0x4F);
+        return sendAndListenForReply(0x4F);
     }
 
     // sd:/advert/####track name
@@ -553,7 +543,7 @@ private:
         return true;
     }
 
-    uint16_t listenForReply(uint8_t command)
+    int32_t listenForReply(uint8_t command)
     {
         uint8_t replyCommand = 0;
         uint16_t replyArg = 0;
@@ -617,12 +607,24 @@ private:
                     T_NOTIFICATION_METHOD::OnError(*this, replyArg);
                     if (_serial.available() == 0)
                     {
-                        return 0;
+                        // -1 means an error occurred
+                        return -1;
                     }
                 }
             }
         } while (command != 0);
 
         return 0;
+    }
+
+    int32_t sendAndListenForReply(uint8_t command, uint16_t arg = 0, int retryCount = 3)
+    {
+        int32_t rep = -1;
+        for (int i = 0; i < retryCount && rep == -1; i++)
+        {
+            sendPacket(command, arg);
+            rep = listenForReply(command);
+        }
+        return rep;
     }
 };
