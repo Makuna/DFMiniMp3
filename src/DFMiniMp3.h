@@ -82,9 +82,10 @@ template <class T_SERIAL_METHOD, class T_NOTIFICATION_METHOD>
 class DFMiniMp3
 {
 public:
-    explicit DFMiniMp3(T_SERIAL_METHOD &serial) : _serial(serial),
-                                                  _lastSendSpace(c_msSendSpace),
-                                                  _isOnline(false)
+    explicit DFMiniMp3(T_SERIAL_METHOD &serial, boolean sendChecksum = true) : _serial(serial),
+                                                                               _lastSendSpace(c_msSendSpace),
+                                                                               _isOnline(false),
+                                                                               _sendChecksum(sendChecksum)
     {
     }
 
@@ -386,11 +387,23 @@ private:
         uint8_t lowByteCheckSum;
         uint8_t endCode;
     };
+    struct DfMp3_Packet_NoCheckSum
+    {
+        uint8_t startCode;
+        uint8_t version;
+        uint8_t length;
+        uint8_t command;
+        uint8_t requestAck;
+        uint8_t hiByteArgument;
+        uint8_t lowByteArgument;
+        uint8_t endCode;
+    };
 
     T_SERIAL_METHOD &_serial;
     uint32_t _lastSend; // not initialized as agreed in issue #63
     uint16_t _lastSendSpace;
     bool _isOnline;
+    bool _sendChecksum;
 
     void drainResponses()
     {
@@ -402,18 +415,39 @@ private:
 
     void sendPacket(uint8_t command, uint16_t arg = 0, uint16_t sendSpaceNeeded = c_msSendSpace)
     {
-        struct DfMp3_Packet out = {0x7E,
-                                   0xFF,
-                                   06,
-                                   command,
-                                   00,
-                                   static_cast<uint8_t>(arg >> 8),
-                                   static_cast<uint8_t>(arg & 0x00ff),
-                                   00,
-                                   00,
-                                   0xEF};
-
-        setChecksum(out);
+        const uint8_t *out;
+        size_t len;
+        if (_sendChecksum)
+        {
+            DfMp3_Packet packet = {
+                0x7E,
+                0xFF,
+                6,
+                command,
+                0,
+                static_cast<uint8_t>(arg >> 8),
+                static_cast<uint8_t>(arg & 0x00ff),
+                0,
+                0,
+                0xEF};
+            setChecksum(packet);
+            out = (const uint8_t *)&packet;
+            len = sizeof(packet);
+        }
+        else
+        {
+            DfMp3_Packet_NoCheckSum packet = {
+                0x7E,
+                0xFF,
+                6,
+                command,
+                0,
+                static_cast<uint8_t>(arg >> 8),
+                static_cast<uint8_t>(arg & 0x00ff),
+                0xEF};
+            out = (const uint8_t *)&packet;
+            len = sizeof(packet);
+        }
 
         // wait for spacing since last send
         while (((millis() - _lastSend) < _lastSendSpace))
@@ -425,7 +459,7 @@ private:
         }
 
         _lastSendSpace = sendSpaceNeeded;
-        _serial.write((const uint8_t *)&out, sizeof(out));
+        _serial.write(out, len);
 
         _lastSend = millis();
     }
