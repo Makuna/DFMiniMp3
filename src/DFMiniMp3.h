@@ -540,6 +540,7 @@ private:
                         break;
 
                     case 0x3d: // micro sd
+                    case 0x4c: // micro sd on MH2024K-16SS
                         T_NOTIFICATION_METHOD::OnPlayFinished(*this, DfMp3_PlaySources_Sd, replyArg);
                         break;
 
