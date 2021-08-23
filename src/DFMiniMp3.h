@@ -82,10 +82,11 @@ template <class T_SERIAL_METHOD, class T_NOTIFICATION_METHOD>
 class DFMiniMp3
 {
 public:
-    explicit DFMiniMp3(T_SERIAL_METHOD &serial, boolean sendChecksum = true) : _serial(serial),
-                                                                               _lastSendSpace(c_msSendSpace),
-                                                                               _isOnline(false),
-                                                                               _sendChecksum(sendChecksum)
+    explicit DFMiniMp3(T_SERIAL_METHOD& serial, boolean sendChecksum = true) :
+        _serial(serial),
+        _lastSendSpace(c_msSendSpace),
+        _isOnline(false),
+        _sendChecksum(sendChecksum)
     {
     }
 
@@ -399,7 +400,7 @@ private:
         uint8_t endCode;
     };
 
-    T_SERIAL_METHOD &_serial;
+    T_SERIAL_METHOD& _serial;
     uint32_t _lastSend; // not initialized as agreed in issue #63
     uint16_t _lastSendSpace;
     bool _isOnline;
@@ -415,7 +416,7 @@ private:
 
     void sendPacket(uint8_t command, uint16_t arg = 0, uint16_t sendSpaceNeeded = c_msSendSpace)
     {
-        const uint8_t *out;
+        const uint8_t* out;
         size_t len;
         if (_sendChecksum)
         {
@@ -429,9 +430,9 @@ private:
                 static_cast<uint8_t>(arg & 0x00ff),
                 0,
                 0,
-                0xEF};
+                0xEF };
             setChecksum(packet);
-            out = (const uint8_t *)&packet;
+            out = (const uint8_t*)&packet;
             len = sizeof(packet);
         }
         else
@@ -444,8 +445,8 @@ private:
                 0,
                 static_cast<uint8_t>(arg >> 8),
                 static_cast<uint8_t>(arg & 0x00ff),
-                0xEF};
-            out = (const uint8_t *)&packet;
+                0xEF };
+            out = (const uint8_t*)&packet;
             len = sizeof(packet);
         }
 
@@ -464,9 +465,9 @@ private:
         _lastSend = millis();
     }
 
-    bool readPacket(uint8_t *command, uint16_t *argument)
+    bool readPacket(uint8_t* command, uint16_t* argument)
     {
-        DfMp3_Packet in = {0};
+        DfMp3_Packet in = { 0 };
         uint8_t read;
 
         // init our out args always
@@ -590,13 +591,13 @@ private:
         return 0;
     }
 
-    uint16_t calcChecksum(DfMp3_Packet &packet)
+    uint16_t calcChecksum(DfMp3_Packet& packet)
     {
         uint16_t sum = packet.version + packet.length + packet.command + packet.requestAck + packet.hiByteArgument + packet.lowByteArgument;
         return -sum;
     }
 
-    void setChecksum(DfMp3_Packet &out)
+    void setChecksum(DfMp3_Packet& out)
     {
         uint16_t sum = calcChecksum(out);
 
@@ -604,7 +605,7 @@ private:
         out.lowByteCheckSum = (sum & 0xff);
     }
 
-    bool validateChecksum(DfMp3_Packet &in)
+    bool validateChecksum(DfMp3_Packet& in)
     {
         uint16_t sum = calcChecksum(in);
         return (sum == static_cast<uint16_t>((in.hiByteCheckSum << 8) | in.lowByteCheckSum));
