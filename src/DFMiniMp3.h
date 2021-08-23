@@ -191,10 +191,10 @@ public:
     {
     }
 
-    void begin(unsigned long baud = 9600)
+    void begin(unsigned long baud = 9600, unsigned long timeout = 10000)
     {
         _serial.begin(baud);
-        _serial.setTimeout(10000);
+        _serial.setTimeout(timeout);
         _lastSend = millis();
     }
 
