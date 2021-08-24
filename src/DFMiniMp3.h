@@ -431,7 +431,7 @@ private:
                 0,
                 0,
                 0xEF };
-            setChecksum(packet);
+            setChecksum(&packet);
             out = reinterpret_cast<const uint8_t*>(&packet);
             len = sizeof(packet);
         }
@@ -598,12 +598,12 @@ private:
         return -sum;
     }
 
-    void setChecksum(DfMp3_Packet& out)
+    void setChecksum(DfMp3_Packet* out)
     {
-        uint16_t sum = calcChecksum(out);
+        uint16_t sum = calcChecksum(*out);
 
-        out.hiByteCheckSum = (sum >> 8);
-        out.lowByteCheckSum = (sum & 0xff);
+        out->hiByteCheckSum = (sum >> 8);
+        out->lowByteCheckSum = (sum & 0xff);
     }
 
     bool validateChecksum(DfMp3_Packet& in)
