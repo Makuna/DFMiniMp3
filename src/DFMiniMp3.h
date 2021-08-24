@@ -99,7 +99,7 @@ public:
 
     void loop()
     {
-        while (_serial.available() >= (int)sizeof(DfMp3_Packet))
+        while (_serial.available() >= static_cast<int>(sizeof(DfMp3_Packet)))
         {
             listenForReply(0x00);
         }
@@ -432,7 +432,7 @@ private:
                 0,
                 0xEF };
             setChecksum(packet);
-            out = (const uint8_t*)&packet;
+            out = reinterpret_cast<const uint8_t*>(&packet);
             len = sizeof(packet);
         }
         else
@@ -446,7 +446,7 @@ private:
                 static_cast<uint8_t>(arg >> 8),
                 static_cast<uint8_t>(arg & 0x00ff),
                 0xEF };
-            out = (const uint8_t*)&packet;
+            out = reinterpret_cast<const uint8_t*>(&packet);
             len = sizeof(packet);
         }
 
