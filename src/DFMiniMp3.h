@@ -594,8 +594,11 @@ private:
 
     uint16_t calcChecksum(DfMp3_Packet& packet)
     {
-        uint16_t sum = packet.version + packet.length + packet.command + packet.requestAck + packet.hiByteArgument + packet.lowByteArgument;
-        return -sum;
+        uint16_t sum = 0xFFFF;
+        for (uint8_t* i = &packet.version; i != &packet.hiByteCheckSum; i++) {
+            sum -= *i;
+        }
+        return sum + 1;
     }
 
     void setChecksum(DfMp3_Packet* out)
