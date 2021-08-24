@@ -537,6 +537,7 @@ private:
                     switch (replyCommand)
                     {
                     case 0x3c: // usb
+                    case 0x4b: // usb on MH2024K-16SS
                         T_NOTIFICATION_METHOD::OnPlayFinished(*this, DfMp3_PlaySources_Usb, replyArg);
                         break;
 
