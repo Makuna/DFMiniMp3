@@ -478,7 +478,7 @@ private:
 
     bool readPacket(uint8_t* command, uint16_t* argument)
     {
-        DfMp3_Packet_WithCheckSum in = { 0 };
+        DfMp3_Packet_WithCheckSum in;
         uint8_t read;
 
         // init our out args always
