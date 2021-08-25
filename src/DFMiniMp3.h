@@ -78,15 +78,24 @@ enum DfMp3_PlaySources // bitfield - more than one can be set
     DfMp3_PlaySources_Flash = 0x08,
 };
 
-template <class T_SERIAL_METHOD, class T_NOTIFICATION_METHOD>
+class Mp3ChipMH2024K16SS {
+public:
+    static const bool mustSendChecksum = false;
+};
+
+class Mp3ChipOriginal {
+public:
+    static const bool mustSendChecksum = true;
+};
+
+template <class T_SERIAL_METHOD, class T_NOTIFICATION_METHOD, class T_CHIP_VARIANT = Mp3ChipOriginal>
 class DFMiniMp3
 {
 public:
     explicit DFMiniMp3(T_SERIAL_METHOD& serial, boolean sendChecksum = true) :
         _serial(serial),
         _lastSendSpace(c_msSendSpace),
-        _isOnline(false),
-        _sendChecksum(sendChecksum)
+        _isOnline(false)
     {
     }
 
@@ -375,7 +384,7 @@ private:
     // 5~6	->	01 01 is argument
     // 7~8	->	checksum = 0 - ( FF+06+0F+00+01+01 )
     // 9	->	EF is end code
-    struct DfMp3_Packet
+    struct DfMp3_Packet_WithCheckSum
     {
         uint8_t startCode;
         uint8_t version;
@@ -388,7 +397,7 @@ private:
         uint8_t lowByteCheckSum;
         uint8_t endCode;
     };
-    struct DfMp3_Packet_NoCheckSum
+    struct DfMp3_Packet_WithoutCheckSum
     {
         uint8_t startCode;
         uint8_t version;
@@ -400,11 +409,15 @@ private:
         uint8_t endCode;
     };
 
+    union DfMp3_Packet {
+        DfMp3_Packet_WithCheckSum withCheckSum;
+        DfMp3_Packet_WithoutCheckSum withoutCheckSum;
+    };
+
     T_SERIAL_METHOD& _serial;
     uint32_t _lastSend; // not initialized as agreed in issue #63
     uint16_t _lastSendSpace;
     bool _isOnline;
-    bool _sendChecksum;
 
     void drainResponses()
     {
@@ -416,11 +429,11 @@ private:
 
     void sendPacket(uint8_t command, uint16_t arg = 0, uint16_t sendSpaceNeeded = c_msSendSpace)
     {
-        const uint8_t* out;
+        DfMp3_Packet packet;
         size_t len;
-        if (_sendChecksum)
+        if (T_CHIP_VARIANT::mustSendChecksum)
         {
-            DfMp3_Packet packet = {
+            packet.withCheckSum = {
                 0x7E,
                 0xFF,
                 6,
@@ -431,13 +444,12 @@ private:
                 0,
                 0,
                 0xEF };
-            setChecksum(&packet);
-            out = reinterpret_cast<const uint8_t*>(&packet);
+            setChecksum(&packet.withCheckSum);
             len = sizeof(packet);
         }
         else
         {
-            DfMp3_Packet_NoCheckSum packet = {
+            packet.withoutCheckSum = {
                 0x7E,
                 0xFF,
                 6,
@@ -446,8 +458,7 @@ private:
                 static_cast<uint8_t>(arg >> 8),
                 static_cast<uint8_t>(arg & 0x00ff),
                 0xEF };
-            out = reinterpret_cast<const uint8_t*>(&packet);
-            len = sizeof(packet);
+            len = sizeof(DfMp3_Packet_WithoutCheckSum);
         }
 
         // wait for spacing since last send
@@ -460,14 +471,14 @@ private:
         }
 
         _lastSendSpace = sendSpaceNeeded;
-        _serial.write(out, len);
+        _serial.write(reinterpret_cast<uint8_t*>(&packet), len);
 
         _lastSend = millis();
     }
 
     bool readPacket(uint8_t* command, uint16_t* argument)
     {
-        DfMp3_Packet in = { 0 };
+        DfMp3_Packet_WithCheckSum in = { 0 };
         uint8_t read;
 
         // init our out args always
@@ -592,7 +603,7 @@ private:
         return 0;
     }
 
-    uint16_t calcChecksum(DfMp3_Packet& packet)
+    uint16_t calcChecksum(DfMp3_Packet_WithCheckSum& packet)
     {
         uint16_t sum = 0xFFFF;
         for (uint8_t* i = &packet.version; i != &packet.hiByteCheckSum; i++) {
@@ -601,7 +612,7 @@ private:
         return sum + 1;
     }
 
-    void setChecksum(DfMp3_Packet* out)
+    void setChecksum(DfMp3_Packet_WithCheckSum* out)
     {
         uint16_t sum = calcChecksum(*out);
 
@@ -609,7 +620,7 @@ private:
         out->lowByteCheckSum = (sum & 0xff);
     }
 
-    bool validateChecksum(DfMp3_Packet& in)
+    bool validateChecksum(DfMp3_Packet_WithCheckSum& in)
     {
         uint16_t sum = calcChecksum(in);
         return (sum == static_cast<uint16_t>((in.hiByteCheckSum << 8) | in.lowByteCheckSum));
