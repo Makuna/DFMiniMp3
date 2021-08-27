@@ -114,7 +114,7 @@ struct DfMp3_Packet_WithoutCheckSum
 
 class Mp3ChipMH2024K16SS {
 public:
-    static const bool mustSendChecksum = false;
+    static const bool SendCheckSum = false;
 
     typedef DfMp3_Packet_WithoutCheckSum SendPacket;
     typedef DfMp3_Packet_WithCheckSum ReceptionPacket;
@@ -122,7 +122,7 @@ public:
 
 class Mp3ChipOriginal {
 public:
-    static const bool mustSendChecksum = true;
+    static const bool SendCheckSum = true;
 
     typedef DfMp3_Packet_WithCheckSum SendPacket;
     typedef DfMp3_Packet_WithCheckSum ReceptionPacket;
@@ -431,7 +431,7 @@ private:
     void sendPacket(uint8_t command, uint16_t arg = 0, uint16_t sendSpaceNeeded = c_msSendSpace)
     {
         typename T_CHIP_VARIANT::SendPacket packet;
-        if (T_CHIP_VARIANT::mustSendChecksum)
+        if (T_CHIP_VARIANT::SendCheckSum)
         {
             packet = {
                 0x7E,
