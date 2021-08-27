@@ -132,7 +132,7 @@ template <class T_SERIAL_METHOD, class T_NOTIFICATION_METHOD, class T_CHIP_VARIA
 class DFMiniMp3
 {
 public:
-    explicit DFMiniMp3(T_SERIAL_METHOD& serial, boolean sendChecksum = true) :
+    explicit DFMiniMp3(T_SERIAL_METHOD& serial) :
         _serial(serial),
         _lastSendSpace(c_msSendSpace),
         _isOnline(false)
@@ -601,10 +601,10 @@ private:
         return 0;
     }
 
-    uint16_t calcChecksum(DfMp3_Packet_WithCheckSum& packet)
+    uint16_t calcChecksum(const DfMp3_Packet_WithCheckSum& packet)
     {
         uint16_t sum = 0xFFFF;
-        for (uint8_t* packetByte = &(packet.version); packetByte != &(packet.hiByteCheckSum); packetByte++) {
+        for (const uint8_t* packetByte = &(packet.version); packetByte != &(packet.hiByteCheckSum); packetByte++) {
             sum -= *packetByte;
         }
         return sum + 1;
