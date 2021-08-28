@@ -112,12 +112,48 @@ struct DfMp3_Packet_WithoutCheckSum
     uint8_t endCode;
 };
 
+
+uint16_t calcChecksum(const DfMp3_Packet_WithCheckSum& packet)
+{
+    uint16_t sum = 0xFFFF;
+    for (const uint8_t* packetByte = &(packet.version); packetByte != &(packet.hiByteCheckSum); packetByte++) {
+        sum -= *packetByte;
+    }
+    return sum + 1;
+}
+
+void setChecksum(DfMp3_Packet_WithCheckSum* out)
+{
+    uint16_t sum = calcChecksum(*out);
+
+    out->hiByteCheckSum = (sum >> 8);
+    out->lowByteCheckSum = (sum & 0xff);
+}
+
+bool validateChecksum(DfMp3_Packet_WithCheckSum& in)
+{
+    uint16_t sum = calcChecksum(in);
+    return (sum == static_cast<uint16_t>((in.hiByteCheckSum << 8) | in.lowByteCheckSum));
+}
+
 class Mp3ChipMH2024K16SS {
 public:
     static const bool SendCheckSum = false;
 
     typedef DfMp3_Packet_WithoutCheckSum SendPacket;
     typedef DfMp3_Packet_WithCheckSum ReceptionPacket;
+
+    static const SendPacket generatePacket(uint8_t command, uint16_t arg) {
+        return {
+            0x7E,
+            0xFF,
+            6,
+            command,
+            0,
+            static_cast<uint8_t>(arg >> 8),
+            static_cast<uint8_t>(arg & 0x00ff),
+            0xEF };
+    }
 };
 
 class Mp3ChipOriginal {
@@ -126,6 +162,22 @@ public:
 
     typedef DfMp3_Packet_WithCheckSum SendPacket;
     typedef DfMp3_Packet_WithCheckSum ReceptionPacket;
+
+    static const SendPacket generatePacket(uint8_t command, uint16_t arg) {
+        SendPacket packet = {
+                0x7E,
+                0xFF,
+                6,
+                command,
+                0,
+                static_cast<uint8_t>(arg >> 8),
+                static_cast<uint8_t>(arg & 0x00ff),
+                0,
+                0,
+                0xEF };
+        setChecksum(&packet);
+        return packet;
+    }
 };
 
 template <class T_SERIAL_METHOD, class T_NOTIFICATION_METHOD, class T_CHIP_VARIANT = Mp3ChipOriginal>
@@ -430,34 +482,7 @@ private:
 
     void sendPacket(uint8_t command, uint16_t arg = 0, uint16_t sendSpaceNeeded = c_msSendSpace)
     {
-        typename T_CHIP_VARIANT::SendPacket packet;
-        if (T_CHIP_VARIANT::SendCheckSum)
-        {
-            packet = {
-                0x7E,
-                0xFF,
-                6,
-                command,
-                0,
-                static_cast<uint8_t>(arg >> 8),
-                static_cast<uint8_t>(arg & 0x00ff),
-                0,
-                0,
-                0xEF };
-            setChecksum(&packet);
-        }
-        else
-        {
-            packet = {
-                0x7E,
-                0xFF,
-                6,
-                command,
-                0,
-                static_cast<uint8_t>(arg >> 8),
-                static_cast<uint8_t>(arg & 0x00ff),
-                0xEF };
-        }
+        typename T_CHIP_VARIANT::SendPacket packet = T_CHIP_VARIANT::generatePacket(command, arg);
 
         // wait for spacing since last send
         while (((millis() - _lastSend) < _lastSendSpace))
@@ -599,28 +624,5 @@ private:
         } while (command != 0);
 
         return 0;
-    }
-
-    uint16_t calcChecksum(const DfMp3_Packet_WithCheckSum& packet)
-    {
-        uint16_t sum = 0xFFFF;
-        for (const uint8_t* packetByte = &(packet.version); packetByte != &(packet.hiByteCheckSum); packetByte++) {
-            sum -= *packetByte;
-        }
-        return sum + 1;
-    }
-
-    void setChecksum(DfMp3_Packet_WithCheckSum* out)
-    {
-        uint16_t sum = calcChecksum(*out);
-
-        out->hiByteCheckSum = (sum >> 8);
-        out->lowByteCheckSum = (sum & 0xff);
-    }
-
-    bool validateChecksum(DfMp3_Packet_WithCheckSum& in)
-    {
-        uint16_t sum = calcChecksum(in);
-        return (sum == static_cast<uint16_t>((in.hiByteCheckSum << 8) | in.lowByteCheckSum));
     }
 };
