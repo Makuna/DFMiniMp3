@@ -130,7 +130,7 @@ void setChecksum(DfMp3_Packet_WithCheckSum* out)
     out->lowByteCheckSum = (sum & 0xff);
 }
 
-bool validateChecksum(DfMp3_Packet_WithCheckSum& in)
+bool validateChecksum(const DfMp3_Packet_WithCheckSum& in)
 {
     uint16_t sum = calcChecksum(in);
     return (sum == static_cast<uint16_t>((in.hiByteCheckSum << 8) | in.lowByteCheckSum));
