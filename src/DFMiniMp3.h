@@ -43,7 +43,6 @@ enum DfMp3_Error
     DfMp3_Error_General = 0xff
 };
 
-
 enum DfMp3_PlaybackMode
 {
     DfMp3_PlaybackMode_Repeat,
@@ -51,7 +50,6 @@ enum DfMp3_PlaybackMode
     DfMp3_PlaybackMode_SingleRepeat,
     DfMp3_PlaybackMode_Random
 };
-
 
 enum DfMp3_Eq
 {
@@ -76,12 +74,114 @@ enum DfMp3_PlaySources // bitfield - more than one can be set
 {
     DfMp3_PlaySources_Usb = 0x01,
     DfMp3_PlaySources_Sd = 0x02,
-    DfMp3_PlaySources_Pc = 0x04, 
+    DfMp3_PlaySources_Pc = 0x04,
     DfMp3_PlaySources_Flash = 0x08,
 };
 
+// 7E FF 06 0F 00 01 01 xx xx EF
+// 0	->	7E is start code
+// 1	->	FF is version
+// 2	->	06 is length
+// 3	->	0F is command
+// 4	->	00 is no receive
+// 5~6	->	01 01 is argument
+// 7~8	->	checksum = 0 - ( FF+06+0F+00+01+01 )
+// 9	->	EF is end code
+struct DfMp3_Packet_WithCheckSum
+{
+    uint8_t startCode;
+    uint8_t version;
+    uint8_t length;
+    uint8_t command;
+    uint8_t requestAck;
+    uint8_t hiByteArgument;
+    uint8_t lowByteArgument;
+    uint8_t hiByteCheckSum;
+    uint8_t lowByteCheckSum;
+    uint8_t endCode;
+};
+struct DfMp3_Packet_WithoutCheckSum
+{
+    uint8_t startCode;
+    uint8_t version;
+    uint8_t length;
+    uint8_t command;
+    uint8_t requestAck;
+    uint8_t hiByteArgument;
+    uint8_t lowByteArgument;
+    uint8_t endCode;
+};
 
-template<class T_SERIAL_METHOD, class T_NOTIFICATION_METHOD> class DFMiniMp3
+
+uint16_t calcChecksum(const DfMp3_Packet_WithCheckSum& packet)
+{
+    uint16_t sum = 0xFFFF;
+    for (const uint8_t* packetByte = &(packet.version); packetByte != &(packet.hiByteCheckSum); packetByte++) {
+        sum -= *packetByte;
+    }
+    return sum + 1;
+}
+
+void setChecksum(DfMp3_Packet_WithCheckSum* out)
+{
+    uint16_t sum = calcChecksum(*out);
+
+    out->hiByteCheckSum = (sum >> 8);
+    out->lowByteCheckSum = (sum & 0xff);
+}
+
+bool validateChecksum(const DfMp3_Packet_WithCheckSum& in)
+{
+    uint16_t sum = calcChecksum(in);
+    return (sum == static_cast<uint16_t>((in.hiByteCheckSum << 8) | in.lowByteCheckSum));
+}
+
+class Mp3ChipMH2024K16SS {
+public:
+    static const bool SendCheckSum = false;
+
+    typedef DfMp3_Packet_WithoutCheckSum SendPacket;
+    typedef DfMp3_Packet_WithCheckSum ReceptionPacket;
+
+    static const SendPacket generatePacket(uint8_t command, uint16_t arg) {
+        return {
+            0x7E,
+            0xFF,
+            6,
+            command,
+            0,
+            static_cast<uint8_t>(arg >> 8),
+            static_cast<uint8_t>(arg & 0x00ff),
+            0xEF };
+    }
+};
+
+class Mp3ChipOriginal {
+public:
+    static const bool SendCheckSum = true;
+
+    typedef DfMp3_Packet_WithCheckSum SendPacket;
+    typedef DfMp3_Packet_WithCheckSum ReceptionPacket;
+
+    static const SendPacket generatePacket(uint8_t command, uint16_t arg) {
+        SendPacket packet = {
+                0x7E,
+                0xFF,
+                6,
+                command,
+                0,
+                static_cast<uint8_t>(arg >> 8),
+                static_cast<uint8_t>(arg & 0x00ff),
+                0,
+                0,
+                0xEF };
+        setChecksum(&packet);
+        return packet;
+    }
+};
+
+template <class T_SERIAL_METHOD, class T_NOTIFICATION_METHOD, class T_CHIP_VARIANT = Mp3ChipOriginal>
+class DFMiniMp3
 {
 public:
     explicit DFMiniMp3(T_SERIAL_METHOD& serial) :
@@ -100,7 +200,7 @@ public:
 
     void loop()
     {
-        while (_serial.available() >= DfMp3_Packet_SIZE)
+        while (_serial.available() >= static_cast<int>(sizeof(typename T_CHIP_VARIANT::ReceptionPacket)))
         {
             listenForReply(0x00);
         }
@@ -260,7 +360,6 @@ public:
         return static_cast<DfMp3_Eq>(listenForReply(0x44));
     }
 
-
     void setPlaybackSource(DfMp3_PlaySource source)
     {
         sendPacket(0x09, source, 200);
@@ -368,31 +467,6 @@ public:
 private:
     static const uint16_t c_msSendSpace = 50;
 
-    // 7E FF 06 0F 00 01 01 xx xx EF
-    // 0	->	7E is start code
-    // 1	->	FF is version
-    // 2	->	06 is length
-    // 3	->	0F is command
-    // 4	->	00 is no receive
-    // 5~6	->	01 01 is argument
-    // 7~8	->	checksum = 0 - ( FF+06+0F+00+01+01 )
-    // 9	->	EF is end code
-    enum DfMp3_Packet
-    {
-        DfMp3_Packet_StartCode,
-        DfMp3_Packet_Version,
-        DfMp3_Packet_Length,
-        DfMp3_Packet_Command,
-        DfMp3_Packet_RequestAck,
-        DfMp3_Packet_HiByteArgument,
-        DfMp3_Packet_LowByteArgument,
-        DfMp3_Packet_HiByteCheckSum,
-        DfMp3_Packet_LowByteCheckSum,
-        DfMp3_Packet_EndCode,
-        DfMp3_Packet_SIZE
-    };
-
-
     T_SERIAL_METHOD& _serial;
     uint32_t _lastSend; // not initialized as agreed in issue #63
     uint16_t _lastSendSpace;
@@ -408,18 +482,7 @@ private:
 
     void sendPacket(uint8_t command, uint16_t arg = 0, uint16_t sendSpaceNeeded = c_msSendSpace)
     {
-        uint8_t out[DfMp3_Packet_SIZE] = { 0x7E,
-            0xFF,
-            06,
-            command,
-            00,
-            static_cast<uint8_t>(arg >> 8),
-            static_cast<uint8_t>(arg & 0x00ff),
-            00,
-            00,
-            0xEF };
-
-        setChecksum(out);
+        typename T_CHIP_VARIANT::SendPacket packet = T_CHIP_VARIANT::generatePacket(command, arg);
 
         // wait for spacing since last send
         while (((millis() - _lastSend) < _lastSendSpace))
@@ -431,14 +494,14 @@ private:
         }
 
         _lastSendSpace = sendSpaceNeeded;
-        _serial.write(out, DfMp3_Packet_SIZE);
+        _serial.write(reinterpret_cast<uint8_t*>(&packet), sizeof(packet));
 
         _lastSend = millis();
     }
 
     bool readPacket(uint8_t* command, uint16_t* argument)
     {
-        uint8_t in[DfMp3_Packet_SIZE] = { 0 };
+        typename T_CHIP_VARIANT::ReceptionPacket in;
         uint8_t read;
 
         // init our out args always
@@ -449,7 +512,7 @@ private:
         do
         {
             // we use readBytes as it gives us the standard timeout
-            read = _serial.readBytes(&(in[DfMp3_Packet_StartCode]), 1);
+            read = _serial.readBytes(&in.startCode, 1);
 
             if (read != 1)
             {
@@ -458,19 +521,19 @@ private:
 
                 return false;
             }
-        } while (in[DfMp3_Packet_StartCode] != 0x7e);
+        } while (in.startCode != 0x7e);
 
-        read += _serial.readBytes(in + 1, DfMp3_Packet_SIZE - 1);
-        if (read < DfMp3_Packet_SIZE)
+        read += _serial.readBytes(&in.version, sizeof(in) - 1);
+        if (read < sizeof(in))
         {
             // not enough bytes, corrupted packet
             *argument = DfMp3_Error_PacketSize;
             return false;
         }
 
-        if (in[DfMp3_Packet_Version] != 0xFF ||
-            in[DfMp3_Packet_Length] != 0x06 ||
-            in[DfMp3_Packet_EndCode] != 0xef)
+        if (in.version != 0xFF ||
+            in.length != 0x06 ||
+            in.endCode != 0xef)
         {
             // invalid version or corrupted packet
             *argument = DfMp3_Error_PacketHeader;
@@ -484,8 +547,8 @@ private:
             return false;
         }
 
-        *command = in[DfMp3_Packet_Command];
-        *argument = ((in[DfMp3_Packet_HiByteArgument] << 8) | in[DfMp3_Packet_LowByteArgument]);
+        *command = in.command;
+        *argument = ((in.hiByteArgument << 8) | in.lowByteArgument);
 
         return true;
     }
@@ -508,10 +571,12 @@ private:
                     switch (replyCommand)
                     {
                     case 0x3c: // usb
+                    case 0x4b: // usb on MH2024K-16SS
                         T_NOTIFICATION_METHOD::OnPlayFinished(*this, DfMp3_PlaySources_Usb, replyArg);
                         break;
 
                     case 0x3d: // micro sd
+                    case 0x4c: // micro sd on MH2024K-16SS
                         T_NOTIFICATION_METHOD::OnPlayFinished(*this, DfMp3_PlaySources_Sd, replyArg);
                         break;
 
@@ -559,29 +624,5 @@ private:
         } while (command != 0);
 
         return 0;
-    }
-
-    uint16_t calcChecksum(uint8_t* packet)
-    {
-        uint16_t sum = 0;
-        for (int i = DfMp3_Packet_Version; i < DfMp3_Packet_HiByteCheckSum; i++)
-        {
-            sum += packet[i];
-        }
-        return -sum;
-    }
-
-    void setChecksum(uint8_t* out)
-    {
-        uint16_t sum = calcChecksum(out);
-
-        out[DfMp3_Packet_HiByteCheckSum] = (sum >> 8);
-        out[DfMp3_Packet_LowByteCheckSum] = (sum & 0xff);
-    }
-
-    bool validateChecksum(uint8_t* in)
-    {
-        uint16_t sum = calcChecksum(in);
-        return (sum == static_cast<uint16_t>((in[DfMp3_Packet_HiByteCheckSum] << 8) | in[DfMp3_Packet_LowByteCheckSum]));
     }
 };
