@@ -25,6 +25,8 @@ License along with DFMiniMp3.  If not, see
 -------------------------------------------------------------------------*/
 #pragma once
 
+#include <stdint.h>
+
 enum DfMp3_Error
 {
     // from device
@@ -112,29 +114,9 @@ struct DfMp3_Packet_WithoutCheckSum
     uint8_t endCode;
 };
 
-
-uint16_t calcChecksum(const DfMp3_Packet_WithCheckSum& packet)
-{
-    uint16_t sum = 0xFFFF;
-    for (const uint8_t* packetByte = &(packet.version); packetByte != &(packet.hiByteCheckSum); packetByte++) {
-        sum -= *packetByte;
-    }
-    return sum + 1;
-}
-
-void setChecksum(DfMp3_Packet_WithCheckSum* out)
-{
-    uint16_t sum = calcChecksum(*out);
-
-    out->hiByteCheckSum = (sum >> 8);
-    out->lowByteCheckSum = (sum & 0xff);
-}
-
-bool validateChecksum(const DfMp3_Packet_WithCheckSum& in)
-{
-    uint16_t sum = calcChecksum(in);
-    return (sum == static_cast<uint16_t>((in.hiByteCheckSum << 8) | in.lowByteCheckSum));
-}
+extern "C++" uint16_t calcChecksum(const DfMp3_Packet_WithCheckSum& packet);
+extern "C++" void setChecksum(DfMp3_Packet_WithCheckSum* out);
+extern "C++" bool validateChecksum(const DfMp3_Packet_WithCheckSum& in);
 
 class Mp3ChipMH2024K16SS {
 public:
