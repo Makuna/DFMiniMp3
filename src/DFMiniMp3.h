@@ -289,7 +289,7 @@ public:
     // 0- 30
     void setVolume(uint8_t volume)
     {
-        sendPacket(0x06, volume);
+        sendPacket(0x06, volume, 100);
     }
 
     uint8_t getVolume()
@@ -372,7 +372,7 @@ public:
 
     void reset()
     {
-        sendPacket(0x0c, 0, 600);
+        sendPacket(0x0c, 0, 1100);
         _isOnline = false;
     }
 
