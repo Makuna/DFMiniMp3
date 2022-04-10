@@ -23,10 +23,22 @@ DFMiniMp3 
 
 ---
 
-This library allows your Arduino project to control the DFPlayer Mini MP3 module.  It supports both hardware serial and software serial.  It was designed to fit in the smallest Arduino hardware by consuming less code and memory space than other libraries.   
+<div align = 'center'>
 
-Please read the product link before connecting your module, it will save you alot of time and effort.  
-[DFRobot's DFPlayer Mini Mp3][Product]
+A library designed to control the **DFPlayer Mini MP3** <br>
+module, able to run even on the smallest **Arduinos** <br>
+thanks to it's low **Flash** / **RAM** consumption and <br>
+capable of both hardware & software **Serial**.
+
+</div>
+
+<br>
+
+## Important
+
+Please check out the **[DFrobot Wiki]** before you connect <br>
+your module, this will save you a lot of time & effort.
+
 
 
 <!----------------------------------------------------------------------------->
@@ -39,7 +51,7 @@ Please read the product link before connecting your module, it will save you alo
 [Paypal]: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=6AA97KE54UJR4
 
 [Documentation]: https://github.com/Makuna/DFMiniMp3/wiki
-[Product]: http://www.dfrobot.com/wiki/index.php/DFPlayer_Mini_SKU:DFR0299
+[DFrobot Wiki]: https://wiki.dfrobot.com/DFPlayer_Mini_SKU_DFR0299
 
 [Install]: Documentation/Install.md
 [License]: COPYING
