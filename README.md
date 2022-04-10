@@ -1,5 +1,6 @@
 # DFPlayer Mini mp3
 
+[![Badge License]][License]
 [![Badge Gitter]][Gitter]
 [![Badge Paypal]][Paypal]
 
@@ -24,6 +25,7 @@ It should now show up in the import list when you restart Arduino IDE.
 
 <!----------------------------------------------------------------------------->
 
+[Badge License]: https://img.shields.io/badge/License-LGPL_v3-blue.svg?style=for-the-badge
 [Badge Gitter]: https://img.shields.io/badge/Gitter-46BC99?style=for-the-badge&logo=gitter&logoColor=white
 [Badge Paypal]: https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white
 
@@ -32,5 +34,7 @@ It should now show up in the import list when you restart Arduino IDE.
 
 [Product]: http://www.dfrobot.com/wiki/index.php/DFPlayer_Mini_SKU:DFR0299
 [Wiki]: https://github.com/Makuna/DFMiniMp3/wiki
+
+[License]: COPYING
 
 
