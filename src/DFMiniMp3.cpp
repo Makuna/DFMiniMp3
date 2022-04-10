@@ -27,22 +27,30 @@ License along with DFMiniMp3.  If not, see
 
 #include "DFMiniMp3.h"
 
-uint16_t calcChecksum(const DfMp3_Packet_WithCheckSum& packet) {
+uint16_t calcChecksum(const DfMp3_Packet_WithCheckSum& packet)
+{
     uint16_t sum = 0xFFFF;
-    for (const uint8_t* packetByte = &(packet.version); packetByte != &(packet.hiByteCheckSum); packetByte++) {
+    for (
+        const uint8_t* packetByte = &(packet.version);
+        packetByte != &(packet.hiByteCheckSum);
+        packetByte++
+    )
+    {
         sum -= *packetByte;
     }
     return sum + 1;
 }
 
-void setChecksum(DfMp3_Packet_WithCheckSum* out) {
+void setChecksum(DfMp3_Packet_WithCheckSum* out)
+{
     uint16_t sum = calcChecksum(*out);
 
     out->hiByteCheckSum = (sum >> 8);
     out->lowByteCheckSum = (sum & 0xff);
 }
 
-bool validateChecksum(const DfMp3_Packet_WithCheckSum& in) {
+bool validateChecksum(const DfMp3_Packet_WithCheckSum& in)
+{
     uint16_t sum = calcChecksum(in);
     return (sum == static_cast<uint16_t>((in.hiByteCheckSum << 8) | in.lowByteCheckSum));
 }

@@ -30,6 +30,7 @@ License along with DFMiniMp3.  If not, see
 enum DfMp3_Error
 {
     // from device
+
     DfMp3_Error_Busy = 1,
     DfMp3_Error_Sleeping,
     DfMp3_Error_SerialWrongStack,
@@ -37,12 +38,14 @@ enum DfMp3_Error
     DfMp3_Error_FileIndexOut,
     DfMp3_Error_FileMismatch,
     DfMp3_Error_Advertise,
+
     // from library
+
     DfMp3_Error_RxTimeout = 0x81,
     DfMp3_Error_PacketSize,
     DfMp3_Error_PacketHeader,
     DfMp3_Error_PacketChecksum,
-    DfMp3_Error_General = 0xff
+    DfMp3_Error_General = 0xFF
 };
 
 enum DfMp3_PlaybackMode
@@ -63,7 +66,8 @@ enum DfMp3_Eq
     DfMp3_Eq_Bass
 };
 
-enum DfMp3_PlaySource // value - only one can be set
+// value - only one can be set
+enum DfMp3_PlaySource 
 {
     DfMp3_PlaySource_Usb = 1,
     DfMp3_PlaySource_Sd,
@@ -72,12 +76,13 @@ enum DfMp3_PlaySource // value - only one can be set
     DfMp3_PlaySource_Flash
 };
 
-enum DfMp3_PlaySources // bitfield - more than one can be set
+// bitfield - more than one can be set
+enum DfMp3_PlaySources
 {
-    DfMp3_PlaySources_Usb = 0x01,
-    DfMp3_PlaySources_Sd = 0x02,
-    DfMp3_PlaySources_Pc = 0x04,
-    DfMp3_PlaySources_Flash = 0x08,
+    DfMp3_PlaySources_Usb = 1 << 0,
+    DfMp3_PlaySources_Sd = 1 << 1,
+    DfMp3_PlaySources_Pc = 1 << 2,
+    DfMp3_PlaySources_Flash = 1 << 3,
 };
 
 // 7E FF 06 0F 00 01 01 xx xx EF
@@ -102,6 +107,15 @@ struct DfMp3_Packet_WithCheckSum
     uint8_t lowByteCheckSum;
     uint8_t endCode;
 };
+
+// 7E FF 06 0F 00 01 01 EF
+// 0	->	7E is start code
+// 1	->	FF is version
+// 2	->	06 is length
+// 3	->	0F is command
+// 4	->	00 is no receive
+// 5~6	->	01 01 is argument
+// 7	->	EF is end code
 struct DfMp3_Packet_WithoutCheckSum
 {
     uint8_t startCode;
@@ -118,14 +132,16 @@ extern "C++" uint16_t calcChecksum(const DfMp3_Packet_WithCheckSum& packet);
 extern "C++" void setChecksum(DfMp3_Packet_WithCheckSum* out);
 extern "C++" bool validateChecksum(const DfMp3_Packet_WithCheckSum& in);
 
-class Mp3ChipMH2024K16SS {
+class Mp3ChipMH2024K16SS
+{
 public:
     static const bool SendCheckSum = false;
 
     typedef DfMp3_Packet_WithoutCheckSum SendPacket;
     typedef DfMp3_Packet_WithCheckSum ReceptionPacket;
 
-    static const SendPacket generatePacket(uint8_t command, uint16_t arg) {
+    static const SendPacket generatePacket(uint8_t command, uint16_t arg)
+    {
         return {
             0x7E,
             0xFF,
@@ -133,30 +149,34 @@ public:
             command,
             0,
             static_cast<uint8_t>(arg >> 8),
-            static_cast<uint8_t>(arg & 0x00ff),
-            0xEF };
+            static_cast<uint8_t>(arg & 0x00FF),
+            0xEF
+        };
     }
 };
 
-class Mp3ChipOriginal {
+class Mp3ChipOriginal
+{
 public:
     static const bool SendCheckSum = true;
 
     typedef DfMp3_Packet_WithCheckSum SendPacket;
     typedef DfMp3_Packet_WithCheckSum ReceptionPacket;
 
-    static const SendPacket generatePacket(uint8_t command, uint16_t arg) {
+    static const SendPacket generatePacket(uint8_t command, uint16_t arg)
+    {
         SendPacket packet = {
-                0x7E,
-                0xFF,
-                6,
-                command,
-                0,
-                static_cast<uint8_t>(arg >> 8),
-                static_cast<uint8_t>(arg & 0x00ff),
-                0,
-                0,
-                0xEF };
+            0x7E,
+            0xFF,
+            6,
+            command,
+            0,
+            static_cast<uint8_t>(arg >> 8),
+            static_cast<uint8_t>(arg & 0x00FF),
+            0,
+            0,
+            0xEF
+        };
         setChecksum(&packet);
         return packet;
     }
@@ -170,8 +190,7 @@ public:
         _serial(serial),
         _lastSendSpace(c_msSendSpace),
         _isOnline(false)
-    {
-    }
+    {}
 
     void begin(unsigned long baud = 9600)
     {
@@ -194,8 +213,8 @@ public:
     DfMp3_PlaySources getPlaySources()
     {
         drainResponses();
-        sendPacket(0x3f);
-        return static_cast<DfMp3_PlaySources>(listenForReply(0x3f));
+        sendPacket(0x3F);
+        return static_cast<DfMp3_PlaySources>(listenForReply(0x3F));
     }
 
     // the track as enumerated across all folders
@@ -216,7 +235,7 @@ public:
     void playFolderTrack(uint8_t folder, uint8_t track)
     {
         uint16_t arg = (folder << 8) | track;
-        sendPacket(0x0f, arg);
+        sendPacket(0x0F, arg);
     }
 
     // sd:/##/####track name
@@ -251,16 +270,16 @@ public:
         switch (source)
         {
         case DfMp3_PlaySource_Usb:
-            command = 0x4b;
+            command = 0x4B;
             break;
         case DfMp3_PlaySource_Sd:
-            command = 0x4c;
+            command = 0x4C;
             break;
         case DfMp3_PlaySource_Flash:
-            command = 0x4d;
+            command = 0x4D;
             break;
         default:
-            command = 0x4c;
+            command = 0x4C;
             break;
         }
 
@@ -268,7 +287,7 @@ public:
         return listenForReply(command);
     }
 
-    // 0- 30
+    // 0-30
     void setVolume(uint8_t volume)
     {
         sendPacket(0x06, volume, 100);
@@ -290,16 +309,6 @@ public:
     {
         sendPacket(0x05);
     }
-
-    // useless, removed
-    // 0-31
-    /*
-    void setVolume(bool mute, uint8_t volume)
-    {
-        uint16_t arg = (!mute << 8) | volume;
-        sendPacket(0x10, arg);
-    }
-    */
 
     void loopGlobalTrack(uint16_t globalTrack)
     {
@@ -349,23 +358,23 @@ public:
 
     void sleep()
     {
-        sendPacket(0x0a);
+        sendPacket(0x0A);
     }
 
     void reset()
     {
-        sendPacket(0x0c, 0, 1100);
+        sendPacket(0x0C, 0, 1100);
         _isOnline = false;
     }
 
     void start()
     {
-        sendPacket(0x0d);
+        sendPacket(0x0D);
     }
 
     void pause()
     {
-        sendPacket(0x0e);
+        sendPacket(0x0E);
     }
 
     void stop()
@@ -383,8 +392,8 @@ public:
     uint16_t getFolderTrackCount(uint16_t folder)
     {
         drainResponses();
-        sendPacket(0x4e, folder);
-        return listenForReply(0x4e);
+        sendPacket(0x4E, folder);
+        return listenForReply(0x4E);
     }
 
     uint16_t getTotalTrackCount(DfMp3_PlaySource source)
@@ -469,8 +478,7 @@ private:
         // wait for spacing since last send
         while (((millis() - _lastSend) < _lastSendSpace))
         {
-            // check for event messages from the device while
-            // we wait
+            // check for event messages from the device while we wait
             loop();
             delay(1);
         }
@@ -503,7 +511,7 @@ private:
 
                 return false;
             }
-        } while (in.startCode != 0x7e);
+        } while (in.startCode != 0x7E);
 
         read += _serial.readBytes(&in.version, sizeof(in) - 1);
         if (read < sizeof(in))
@@ -515,7 +523,7 @@ private:
 
         if (in.version != 0xFF ||
             in.length != 0x06 ||
-            in.endCode != 0xef)
+            in.endCode != 0xEF)
         {
             // invalid version or corrupted packet
             *argument = DfMp3_Error_PacketHeader;
@@ -552,17 +560,17 @@ private:
                 {
                     switch (replyCommand)
                     {
-                    case 0x3c: // usb
-                    case 0x4b: // usb on MH2024K-16SS
+                    case 0x3C: // usb
+                    case 0x4B: // usb on MH2024K-16SS
                         T_NOTIFICATION_METHOD::OnPlayFinished(*this, DfMp3_PlaySources_Usb, replyArg);
                         break;
 
-                    case 0x3d: // micro sd
-                    case 0x4c: // micro sd on MH2024K-16SS
+                    case 0x3D: // micro sd
+                    case 0x4C: // micro sd on MH2024K-16SS
                         T_NOTIFICATION_METHOD::OnPlayFinished(*this, DfMp3_PlaySources_Sd, replyArg);
                         break;
 
-                    case 0x3e: // flash
+                    case 0x3E: // flash
                         T_NOTIFICATION_METHOD::OnPlayFinished(*this, DfMp3_PlaySources_Flash, replyArg);
                         break;
 
