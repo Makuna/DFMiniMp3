@@ -1,8 +1,33 @@
 
-## Installing This Library (prefered, you just want to use it)  
-Open the Library Manager and search for "DFPlayer Mini Mp3 by Makuna" and install.
+# Installation
 
-## Installing This Library From GitHub (advanced, you want to contribute)  
-Create a directory in your Arduino\Library folder named "DfMiniMp3"  
-Clone (Git) this project into that folder.  
-It should now show up in the import list when you restart Arduino IDE.  
+## Arduino IDE
+
+*Use this method if you just want to use the library as is.*
+
+1. ***Open*** the `Library Manger`
+
+    <kbd> **Tools** </kbd> › <kbd> **Manage Libraries** </kbd>
+    
+2. ***Search*** for:
+
+    ```
+    DFPlayer Mini Mp3 by Makuna
+    ```
+    
+3. ***Install*** the library.
+
+<br>
+
+## Github
+
+*Consider this method if you want to contribute.*
+
+1. Create a directory named `DfMiniMp3` <br>
+   in your `Arduino/libraries` folder.
+   
+2. Clone the repository into that folder.
+
+3. Restart the **Arduino IDE**
+
+*It should now show up in the imports list.*
