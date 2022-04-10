@@ -1,10 +1,15 @@
-# DFPlayer Mini mp3
 
-[![Badge License]][License]
+<h1>
+
+DFMiniMp3 
+[![Badge License]][License] 
 [![Badge Gitter]][Gitter]
 [![Badge Paypal]][Paypal]
 
-Library for the DFPlayer Mini Mp3 module  
+</h1>
+
+*A Library For The **DFPlayer Mini mp3** Module*
+
 
 This library allows your Arduino project to control the DFPlayer Mini MP3 module.  It supports both hardware serial and software serial.  It was designed to fit in the smallest Arduino hardware by consuming less code and memory space than other libraries.   
 
