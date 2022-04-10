@@ -10,8 +10,6 @@ DFMiniMp3  
 
 *A Library For The **DFPlayer Mini mp3** Module*
 
-<br>
-
 ---
 
 <div align = 'center'>
@@ -22,6 +20,8 @@ DFMiniMp3  
 </div>
 
 ---
+
+<br>
 
 <div align = 'center'>
 
