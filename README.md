@@ -1,10 +1,10 @@
 
 <h1>
 
-DFMiniMp3 
-[![Badge License]][License] 
+DFMiniMp3  
 [![Badge Gitter]][Gitter]
-[![Badge Paypal]][Paypal]
+[![Badge Paypal]][Paypal] 
+[![Badge License]][License]
 
 </h1>
 
@@ -35,11 +35,11 @@ Please read the product link before connecting your module, it will save you alo
 [Badge Gitter]: https://img.shields.io/badge/Gitter-46BC99?style=for-the-badge&logo=gitter&logoColor=white
 [Badge Paypal]: https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white
 
-[Gitter]: https://gitter.im/DFMiniMp3/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
-[Paypal]: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=6AA97KE54UJR4
+[Gitter]: https://gitter.im/DFMiniMp3/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge 'Join Us On Gitter'
+[Paypal]: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=6AA97KE54UJR4 'Donate Via Paypal'
 
 [Documentation]: https://github.com/Makuna/DFMiniMp3/wiki
 [Product]: http://www.dfrobot.com/wiki/index.php/DFPlayer_Mini_SKU:DFR0299
 
 [Install]: Documentation/Install.md
-[License]: COPYING
+[License]: COPYING 'This Repository Is Licensed Under The LGPLv3 License'
