@@ -25,10 +25,10 @@ DFMiniMp3  
 
 <div align = 'center'>
 
-A library designed to control the **DFPlayer Mini MP3** <br>
-module, able to run even on the smallest **Arduinos** <br>
-thanks to it's low **Flash** / **RAM** consumption and <br>
-capable of both hardware & software **Serial**.
+A library designed to control the **DFPlayer Mini MP3** <br>
+module, able to run even on the smallest **Arduinos** <br>
+thanks to it's low **Flash** / **RAM** consumption and <br>
+capable of both hardware & software **Serial** .
 
 </div>
 
@@ -36,7 +36,7 @@ capable of both hardware & software **Serial**.
 
 ## Important
 
-Please check out the **[DFrobot Wiki]** before you connect <br>
+Please check out the **[DFrobot Wiki]** before you connect <br>
 your module, this will save you a lot of time & effort.
 
 
