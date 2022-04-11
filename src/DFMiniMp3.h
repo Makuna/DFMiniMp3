@@ -100,6 +100,15 @@ struct DfMp3_Packet_WithCheckSum
     uint8_t lowByteCheckSum;
     uint8_t endCode;
 };
+
+// 7E FF 06 0F 00 01 01 EF
+// 0	->	7E is start code
+// 1	->	FF is version
+// 2	->	06 is length
+// 3	->	0F is command
+// 4	->	00 is no receive
+// 5~6	->	01 01 is argument
+// 7	->	EF is end code
 struct DfMp3_Packet_WithoutCheckSum
 {
     uint8_t startCode;
@@ -112,38 +121,45 @@ struct DfMp3_Packet_WithoutCheckSum
     uint8_t endCode;
 };
 
-
-uint16_t calcChecksum(const DfMp3_Packet_WithCheckSum& packet)
+class Mp3ChipBase
 {
-    uint16_t sum = 0xFFFF;
-    for (const uint8_t* packetByte = &(packet.version); packetByte != &(packet.hiByteCheckSum); packetByte++) {
-        sum -= *packetByte;
+private:
+    static uint16_t calcChecksum(const DfMp3_Packet_WithCheckSum& packet)
+    {
+        uint16_t sum = 0xFFFF;
+        for (const uint8_t* packetByte = &(packet.version); packetByte != &(packet.hiByteCheckSum); packetByte++)
+        {
+            sum -= *packetByte;
+        }
+        return sum + 1;
     }
-    return sum + 1;
-}
 
-void setChecksum(DfMp3_Packet_WithCheckSum* out)
+public:
+    static void setChecksum(DfMp3_Packet_WithCheckSum* out)
+    {
+        uint16_t sum = calcChecksum(*out);
+
+        out->hiByteCheckSum = (sum >> 8);
+        out->lowByteCheckSum = (sum & 0xff);
+    }
+
+    static bool validateChecksum(const DfMp3_Packet_WithCheckSum& in)
+    {
+        uint16_t sum = calcChecksum(in);
+        return (sum == static_cast<uint16_t>((in.hiByteCheckSum << 8) | in.lowByteCheckSum));
+    }
+};
+
+class Mp3ChipMH2024K16SS : public Mp3ChipBase 
 {
-    uint16_t sum = calcChecksum(*out);
-
-    out->hiByteCheckSum = (sum >> 8);
-    out->lowByteCheckSum = (sum & 0xff);
-}
-
-bool validateChecksum(const DfMp3_Packet_WithCheckSum& in)
-{
-    uint16_t sum = calcChecksum(in);
-    return (sum == static_cast<uint16_t>((in.hiByteCheckSum << 8) | in.lowByteCheckSum));
-}
-
-class Mp3ChipMH2024K16SS {
 public:
     static const bool SendCheckSum = false;
 
     typedef DfMp3_Packet_WithoutCheckSum SendPacket;
     typedef DfMp3_Packet_WithCheckSum ReceptionPacket;
 
-    static const SendPacket generatePacket(uint8_t command, uint16_t arg) {
+    static const SendPacket generatePacket(uint8_t command, uint16_t arg) 
+    {
         return {
             0x7E,
             0xFF,
@@ -156,14 +172,16 @@ public:
     }
 };
 
-class Mp3ChipOriginal {
+class Mp3ChipOriginal : public Mp3ChipBase 
+{
 public:
     static const bool SendCheckSum = true;
 
     typedef DfMp3_Packet_WithCheckSum SendPacket;
     typedef DfMp3_Packet_WithCheckSum ReceptionPacket;
 
-    static const SendPacket generatePacket(uint8_t command, uint16_t arg) {
+    static const SendPacket generatePacket(uint8_t command, uint16_t arg) 
+    {
         SendPacket packet = {
                 0x7E,
                 0xFF,
@@ -540,7 +558,7 @@ private:
             return false;
         }
 
-        if (!validateChecksum(in))
+        if (!T_CHIP_VARIANT::validateChecksum(in))
         {
             // checksum failed, corrupted packet
             *argument = DfMp3_Error_PacketChecksum;
