@@ -385,12 +385,17 @@ public:
 
     void sleep()
     {
-        sendPacket(0x0a);
+        sendPacket(0x0a, 0, 1000);
+    }
+
+    void awake()
+    {
+        sendPacket(0x0b, 0, 1000);
     }
 
     void reset()
     {
-        sendPacket(0x0c, 0, 1100);
+        sendPacket(0x0c, 0, 1500);
         _isOnline = false;
     }
 
