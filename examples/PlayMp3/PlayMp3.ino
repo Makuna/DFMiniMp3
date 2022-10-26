@@ -61,6 +61,15 @@ public:
   {
     Serial.print("Play finished for #");
     Serial.println(track);  
+
+    // start next track
+    track += 1;
+    // this example will just start back over with 1 after track 3
+    if (track > 3) 
+    {
+      track = 1;
+    }
+    dfmp3.playMp3FolderTrack(track);  // sd:/mp3/0001.mp3, sd:/mp3/0002.mp3, sd:/mp3/0003.mp3
   }
   static void OnPlaySourceOnline([[maybe_unused]] DfMp3& mp3, DfMp3_PlaySources source)
   {
@@ -94,6 +103,9 @@ void setup()
   Serial.println(count);
   
   Serial.println("starting...");
+
+  // start the first track playing
+  dfmp3.playMp3FolderTrack(1);  // sd:/mp3/0001.mp3
 }
 
 void waitMilliseconds(uint16_t msWait)
@@ -112,18 +124,5 @@ void waitMilliseconds(uint16_t msWait)
 
 void loop() 
 {
-  Serial.println("track 1"); 
-  dfmp3.playMp3FolderTrack(1);  // sd:/mp3/0001.mp3
-  
-  waitMilliseconds(5000);
-  
-  Serial.println("track 2"); 
-  dfmp3.playMp3FolderTrack(2); // sd:/mp3/0002.mp3
-  
-  waitMilliseconds(5000);
-  
-  Serial.println("track 3");
-  dfmp3.playMp3FolderTrack(3); // sd:/mp3/0002.mp3
-  
-  waitMilliseconds(5000); 
+  waitMilliseconds(100);
 }
