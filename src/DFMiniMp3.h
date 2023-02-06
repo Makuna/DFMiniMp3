@@ -146,7 +146,7 @@ public:
     static bool validateChecksum(const DfMp3_Packet_WithCheckSum& in)
     {
         uint16_t sum = calcChecksum(in);
-        return (sum == static_cast<uint16_t>((in.hiByteCheckSum << 8) | in.lowByteCheckSum));
+        return (sum == ((static_cast<uint16_t>(in.hiByteCheckSum) << 8) | in.lowByteCheckSum));
     }
 };
 
@@ -259,7 +259,7 @@ public:
     // track number must be four digits, zero padded
     void playFolderTrack16(uint8_t folder, uint16_t track)
     {
-        uint16_t arg = (((uint16_t)folder) << 12) | track;
+        uint16_t arg = (static_cast<uint16_t>(folder) << 12) | track;
         sendPacket(0x14, arg);
     }
 
@@ -571,7 +571,7 @@ private:
         }
 
         *command = in.command;
-        *argument = ((in.hiByteArgument << 8) | in.lowByteArgument);
+        *argument = ((static_cast<uint16_t>(in.hiByteArgument) << 8) | in.lowByteArgument);
 
         return true;
     }
