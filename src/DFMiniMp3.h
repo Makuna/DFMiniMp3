@@ -349,6 +349,12 @@ public:
         sendPacket(0x17, folder);
     }
 
+    // not well supported, use at your own risk
+    void setPlaybackMode(DfMp3_PlaybackMode mode)
+    {
+        sendPacket(0x08, mode);
+    }
+
     DfMp3_PlaybackMode getPlaybackMode()
     {
         drainResponses();
@@ -516,6 +522,12 @@ private:
             delay(1);
         }
 
+#ifdef DfMiniMp3Debug
+        DfMiniMp3Debug.print("OUT ");
+        printRawPacket(reinterpret_cast<const uint8_t*>(&packet), sizeof(packet));
+        DfMiniMp3Debug.println();
+#endif
+
         _lastSendSpace = sendSpaceNeeded;
         _serial.write(reinterpret_cast<uint8_t*>(&packet), sizeof(packet));
 
@@ -569,6 +581,12 @@ private:
             *argument = DfMp3_Error_PacketChecksum;
             return false;
         }
+
+#ifdef DfMiniMp3Debug
+        DfMiniMp3Debug.print("IN ");
+        printRawPacket(reinterpret_cast<const uint8_t*>(&in), sizeof(in));
+        DfMiniMp3Debug.println();
+#endif
 
         *command = in.command;
         *argument = ((static_cast<uint16_t>(in.hiByteArgument) << 8) | in.lowByteArgument);
@@ -648,4 +666,19 @@ private:
 
         return 0;
     }
+
+#ifdef DfMiniMp3Debug
+    void printRawPacket(const uint8_t* data, size_t dataSize)
+    {
+        char formated[8];
+        const uint8_t* end = data + dataSize;
+
+        while (data < end)
+        {
+            sprintf(formated, " %02x", *data);
+            DfMiniMp3Debug.print(formated);
+            data++;
+        }
+    }
+#endif
 };
