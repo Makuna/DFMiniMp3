@@ -7,10 +7,14 @@
 #######################################
 
 DFMiniMp3	KEYWORD1
+DfMp3_Status	KEYWORD1
+DfMp3_Error	KEYWORD1
 DfMp3_PlaybackMode	KEYWORD1
 DfMp3_Eq	KEYWORD1
 DfMp3_PlaySource	KEYWORD1
 DfMp3_PlaySources	KEYWORD1
+DfMp3_StatusState	KEYWORD1
+DfMp3_StatusSource	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
@@ -18,6 +22,7 @@ DfMp3_PlaySources	KEYWORD1
 
 begin	KEYWORD2
 loop	KEYWORD2
+setComRetries	KEYWORD2
 getPlaySources	KEYWORD2
 playGlobalTrack	KEYWORD2
 playMp3FolderTrack	KEYWORD2
@@ -40,6 +45,7 @@ setEq	KEYWORD2
 getEq	KEYWORD2
 setPlaybackSource	KEYWORD2
 sleep	KEYWORD2
+awake	KEYWORD2
 reset	KEYWORD2
 start	KEYWORD2
 pause	KEYWORD2
@@ -77,3 +83,26 @@ DfMp3_PlaySources_Usb	LITERAL1
 DfMp3_PlaySources_Sd	LITERAL1
 DfMp3_PlaySources_Pc	LITERAL1
 DfMp3_PlaySources_Flash	LITERAL1
+DfMp3_StatusState_Idle	LITERAL1
+DfMp3_StatusState_Playing	LITERAL1
+DfMp3_StatusState_Paused	LITERAL1
+DfMp3_StatusState_Sleep	LITERAL1
+DfMp3_StatusState_Shuffling	LITERAL1
+DfMp3_StatusSource_General	LITERAL1
+DfMp3_StatusSource_Usb	LITERAL1
+DfMp3_StatusSource_Sd	LITERAL1
+DfMp3_StatusSource_Sleep	LITERAL1
+DfMp3_Error_Busy	LITERAL1
+DfMp3_Error_Sleeping	LITERAL1
+DfMp3_Error_SerialWrongStack	LITERAL1
+DfMp3_Error_CheckSumNotMatch	LITERAL1
+DfMp3_Error_FileIndexOut	LITERAL1
+DfMp3_Error_FileMismatch	LITERAL1
+DfMp3_Error_Advertise	LITERAL1
+DfMp3_Error_SdReadFail	LITERAL1
+DfMp3_Error_EnteredSleep	LITERAL1
+DfMp3_Error_RxTimeout	LITERAL1
+DfMp3_Error_PacketSize	LITERAL1
+DfMp3_Error_PacketHeader	LITERAL1
+DfMp3_Error_PacketChecksum	LITERAL1
+DfMp3_Error_General	LITERAL1

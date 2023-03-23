@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/Makuna/DFMiniMp3"
   },
-  "version": "1.1.1",
+  "version": "1.2.0",
   "frameworks": "arduino",
   "platforms": "*"
 }
