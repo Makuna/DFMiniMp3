@@ -150,6 +150,10 @@ struct DfMp3_Status
     DfMp3_StatusState state;
 };
 
+const uint8_t DfMp3_PacketStartCode = 0x7e;
+const uint8_t DfMp3_PacketVersion = 0xff;
+const uint8_t DfMp3_PacketEndCode = 0xef;
+
 // 7E FF 06 0F 00 01 01 xx xx EF
 // 0	->	7E is start code
 // 1	->	FF is version
@@ -233,14 +237,14 @@ public:
     static const SendPacket generatePacket(uint8_t command, uint16_t arg, bool requestAck = false) 
     {
         return {
-            0x7E,
-            0xFF,
-            6,
+            DfMp3_PacketStartCode,
+            DfMp3_PacketVersion,
+            6, // size: of what?  without checksum this doesn't make sense
             command,
             requestAck,
             static_cast<uint8_t>(arg >> 8),
             static_cast<uint8_t>(arg & 0x00ff),
-            0xEF };
+            DfMp3_PacketEndCode };
     }
 };
 
@@ -255,16 +259,16 @@ public:
     static const SendPacket generatePacket(uint8_t command, uint16_t arg, bool requestAck = false)
     {
         SendPacket packet = {
-                0x7E,
-                0xFF,
-                6,
+                DfMp3_PacketStartCode,
+                DfMp3_PacketVersion,
+                6, // size, remaining bytes not including end code
                 command,
                 requestAck,
                 static_cast<uint8_t>(arg >> 8),
                 static_cast<uint8_t>(arg & 0x00ff),
-                0,
-                0,
-                0xEF };
+                0, // checksum calculated below
+                0, // checksum calculated below
+                DfMp3_PacketEndCode };
         setChecksum(&packet);
         return packet;
     }
