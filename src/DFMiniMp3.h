@@ -41,8 +41,10 @@ public:
         _serial(serial),
         _comRetries(3), // default to three retries
         _isOnline(false),
+#ifdef DfMiniMp3Debug
         _inTransaction(0),
-        _queueNotifications(4) // default to 4 notification max queue
+#endif
+        _queueNotifications(4) // default to 4 notifications in queue
     {
     }
 
@@ -298,16 +300,16 @@ public:
         switch (source)
         {
         case DfMp3_PlaySource_Usb:
-            command = Mp3_Commands_GetUsbTrackount;
+            command = Mp3_Commands_GetUsbTrackCount;
             break;
         case DfMp3_PlaySource_Sd:
-            command = Mp3_Commands_GetSdTrackount;
+            command = Mp3_Commands_GetSdTrackCount;
             break;
         case DfMp3_PlaySource_Flash:
-            command = Mp3_Commands_GetFlashTrackount;
+            command = Mp3_Commands_GetFlashTrackCount;
             break;
         default:
-            command = Mp3_Commands_GetSdTrackount;
+            command = Mp3_Commands_GetSdTrackCount;
             break;
         }
 
@@ -367,18 +369,22 @@ private:
     T_SERIAL_METHOD& _serial;
     uint8_t _comRetries;
     volatile bool _isOnline;
+#ifdef DfMiniMp3Debug
     int8_t _inTransaction;
+#endif
     queueSimple_t<reply_t> _queueNotifications;
 
     void appendNotification(reply_t reply)
     {
-        // store the notification for later calling
+        // store the notification for later calling so
+        // and current comms transactions can be finished
+        // without interruption
         _queueNotifications.Enqueue(reply);
     }
 
     bool abateNotification()
     {
-        // remove the first notication and call it
+        // remove the first notification and call it
         reply_t reply;
         bool wasAbated = false;
         if (_queueNotifications.Dequeue(&reply))
@@ -523,26 +529,32 @@ private:
         reply_t reply;
         uint8_t retries = _comRetries;
 
-        if (_inTransaction == 0)
-        {
-            drainResponses();
-        }
+
+
 #ifdef DfMiniMp3Debug
-        else
+        if (_inTransaction != 0)
         {
             DfMiniMp3Debug.print("Rentrant? _inTransaction ");
             DfMiniMp3Debug.print(_inTransaction);
         }
+        else
 #endif
+        {
+            drainResponses();
+        }
 
+#ifdef DfMiniMp3Debug
         _inTransaction++;
+#endif
         do
         {
             sendPacket(command, arg, requestAck); 
             reply = listenForReply(expectedCommand);
             retries--;
         } while (reply.command != expectedCommand && retries);
+#ifdef DfMiniMp3Debug
         _inTransaction--;
+#endif
 
         if (reply.command == Mp3_Replies_Error)
         {
@@ -589,7 +601,7 @@ private:
                 {
                     appendNotification(reply);
                 }
-                if (command != Mp3_Commands_None)
+                else
                 {
                     return reply;
                 }

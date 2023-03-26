@@ -35,10 +35,11 @@ enum DfMp3_Error
     DfMp3_Error_Sleeping,         //  frame not received    sleep
     DfMp3_Error_SerialWrongStack, //  verification error    frame not received
     DfMp3_Error_CheckSumNotMatch, //                        checksum
-    DfMp3_Error_FileIndexOut,     //                        track out of scope
-    DfMp3_Error_FileMismatch,     //                        track not found
+    DfMp3_Error_FileIndexOut,     //  folder out of scope   track out of scope
+    DfMp3_Error_FileMismatch,     //  folder not found      track not found
     DfMp3_Error_Advertise,        //                        only allowed while playing     advertisement not allowed
-    DfMp3_Error_SdReadFail,        //                        SD card failed
+    DfMp3_Error_SdReadFail,       //                        SD card failed
+    DfMp3_Error_FlashReadFail,    //                        Flash mem failed
     DfMp3_Error_EnteredSleep = 10, //                        entered sleep    
     // from library
     DfMp3_Error_RxTimeout = 0x81,
