@@ -25,9 +25,9 @@ License along with DFMiniMp3.  If not, see
 -------------------------------------------------------------------------*/
 #pragma once
 
-#include "queueSimple.h"
+#include "internal/queueSimple.h"
 #include "DfMp3Types.h"
-#include "Mp3Packet.h"
+#include "internal/Mp3Packet.h"
 #include "Mp3ChipBase.h"
 #include "Mp3ChipOriginal.h"
 #include "Mp3ChipMH2024K16SS.h"
