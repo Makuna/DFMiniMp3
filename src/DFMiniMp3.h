@@ -25,6 +25,7 @@ License along with DFMiniMp3.  If not, see
 -------------------------------------------------------------------------*/
 #pragma once
 
+#include "queueSimple.h"
 #include "DfMp3Types.h"
 #include "Mp3Packet.h"
 #include "Mp3ChipBase.h"
@@ -39,13 +40,21 @@ public:
     explicit DFMiniMp3(T_SERIAL_METHOD& serial) :
         _serial(serial),
         _comRetries(3), // default to three retries
-        _isOnline(false)
+        _isOnline(false),
+        _inTransaction(0),
+        _queueNotifications(4) // default to 4 notification max queue
     {
     }
 
     void begin(unsigned long baud = 9600)
     {
         _serial.begin(baud);
+        _serial.setTimeout(900); // long enough to allow Mp3 to think
+    }
+
+    void begin(int8_t rxPin, int8_t txPin, unsigned long baud = 9600)
+    {
+        _serial.begin(baud, SERIAL_8N1, rxPin, txPin);
         _serial.setTimeout(900); // long enough to allow Mp3 to think
     }
 
@@ -56,6 +65,10 @@ public:
 
     void loop()
     {
+        // call all outstanding notifications
+        while (abateNotification());
+
+        // check for any new notifications in comms
         while (_serial.available() >= static_cast<int>(sizeof(typename T_CHIP_VARIANT::ReceptionPacket)))
         {
             listenForReply(Mp3_Commands_None);
@@ -63,11 +76,20 @@ public:
     }
 
     // Does not work with all models.
+    // 0x3f reply overlaps the play source online notification
+    // so this is why I suspect this has been deprecated and should
+    // be avoided as there is not a way to tell a notification from a value return
     // YX5200-24SS - sends reply
     // MH2024K-24SS - sends NO reply --> results in error notification
+    [[deprecated("Command in conflict with notification with no valid solution.")]]
     DfMp3_PlaySources getPlaySources()
     {
         return getCommand(Mp3_Commands_GetPlaySources).arg;
+    }
+
+    uint16_t getSoftwareVersion()
+    {
+        return getCommand(Mp3_Commands_GetSoftwareVersion).arg;
     }
 
     // the track as enumerated across all folders
@@ -226,10 +248,16 @@ public:
         setCommand(Mp3_Commands_Awake);
     }
 
-    void reset()
+    void reset(bool waitForOnline = true)
     {
         setCommand(Mp3_Commands_Reset);
+
         _isOnline = false;
+        while (waitForOnline && !_isOnline)
+        {
+            delay(1);
+            loop();
+        }
     }
 
     void start()
@@ -322,14 +350,92 @@ private:
     {
         uint8_t command;
         uint16_t arg;
+
+#ifdef DfMiniMp3Debug
+        void printReply() const
+        {
+            char formated[8];
+
+            sprintf(formated, " %02x", command);
+            DfMiniMp3Debug.print(formated);
+            sprintf(formated, " %04x", arg);
+            DfMiniMp3Debug.print(formated);
+        }
+#endif
     };
 
     T_SERIAL_METHOD& _serial;
     uint8_t _comRetries;
-    bool _isOnline;
+    volatile bool _isOnline;
+    int8_t _inTransaction;
+    queueSimple_t<reply_t> _queueNotifications;
+
+    void appendNotification(reply_t reply)
+    {
+        // store the notification for later calling
+        _queueNotifications.Enqueue(reply);
+    }
+
+    bool abateNotification()
+    {
+        // remove the first notication and call it
+        reply_t reply;
+        bool wasAbated = false;
+        if (_queueNotifications.Dequeue(&reply))
+        {
+            callNotification(reply);
+            wasAbated = true;
+        }
+        return wasAbated;
+    }
+
+    void callNotification(reply_t reply)
+    {
+        switch (reply.command)
+        {
+        case Mp3_Replies_TrackFinished_Usb: // usb
+            T_NOTIFICATION_METHOD::OnPlayFinished(*this, DfMp3_PlaySources_Usb, reply.arg);
+            break;
+
+        case Mp3_Replies_TrackFinished_Sd: // micro sd
+            T_NOTIFICATION_METHOD::OnPlayFinished(*this, DfMp3_PlaySources_Sd, reply.arg);
+            break;
+
+        case Mp3_Replies_TrackFinished_Flash: // flash
+            T_NOTIFICATION_METHOD::OnPlayFinished(*this, DfMp3_PlaySources_Flash, reply.arg);
+            break;
+
+        case Mp3_Replies_PlaySource_Online:
+            T_NOTIFICATION_METHOD::OnPlaySourceOnline(*this, static_cast<DfMp3_PlaySources>(reply.arg));
+            break;
+
+        case Mp3_Replies_PlaySource_Inserted:
+            T_NOTIFICATION_METHOD::OnPlaySourceInserted(*this, static_cast<DfMp3_PlaySources>(reply.arg));
+            break;
+
+        case Mp3_Replies_PlaySource_Removed:
+            T_NOTIFICATION_METHOD::OnPlaySourceRemoved(*this, static_cast<DfMp3_PlaySources>(reply.arg));
+            break;
+
+        case Mp3_Replies_Error: // error
+            T_NOTIFICATION_METHOD::OnError(*this, reply.arg);
+            break;
+
+        default:
+#ifdef DfMiniMp3Debug
+            DfMiniMp3Debug.print("INVALID NOTIFICATION: ");
+            reply.printReply();
+            DfMiniMp3Debug.println();
+#endif
+            break;
+        }
+    }
 
     void drainResponses()
     {
+        // call all outstanding notifications
+        while (abateNotification());
+
         while (_serial.available() > 0)
         {
             listenForReply(Mp3_Commands_None);
@@ -351,7 +457,7 @@ private:
 
     bool readPacket(reply_t* reply)
     {
-        typename T_CHIP_VARIANT::ReceptionPacket in;
+        typename T_CHIP_VARIANT::ReceptionPacket in = { 0 };
         uint8_t read;
 
         // init our out args always
@@ -417,21 +523,33 @@ private:
         reply_t reply;
         uint8_t retries = _comRetries;
 
-        drainResponses();
+        if (_inTransaction == 0)
+        {
+            drainResponses();
+        }
+#ifdef DfMiniMp3Debug
+        else
+        {
+            DfMiniMp3Debug.print("Rentrant? _inTransaction ");
+            DfMiniMp3Debug.print(_inTransaction);
+        }
+#endif
 
+        _inTransaction++;
         do
         {
             sendPacket(command, arg, requestAck); 
             reply = listenForReply(expectedCommand);
             retries--;
         } while (reply.command != expectedCommand && retries);
+        _inTransaction--;
 
-        if (reply.command == Mp3_Commands_Error)
+        if (reply.command == Mp3_Replies_Error)
         {
             T_NOTIFICATION_METHOD::OnError(*this, reply.arg);
             reply = { 0 };
         }
-
+        
         return reply;
     }
 
@@ -442,7 +560,7 @@ private:
 
     void setCommand(uint8_t command, uint16_t arg = 0)
     {
-        retryCommand(command, Mp3_Commands_Ack, arg, true);
+        retryCommand(command, Mp3_Replies_Ack, arg, true);
     }
 
     reply_t listenForReply(uint8_t command)
@@ -453,43 +571,31 @@ private:
         {
             switch (reply.command)
             {
-            case 0x3c: // usb
-            case 0x4b: // usb on MH2024K-16SS
-                T_NOTIFICATION_METHOD::OnPlayFinished(*this, DfMp3_PlaySources_Usb, reply.arg);
-                break;
-
-            case 0x3d: // micro sd
-            case 0x4c: // micro sd on MH2024K-16SS
-                T_NOTIFICATION_METHOD::OnPlayFinished(*this, DfMp3_PlaySources_Sd, reply.arg);
-                break;
-
-            case 0x3e: // flash
-                T_NOTIFICATION_METHOD::OnPlayFinished(*this, DfMp3_PlaySources_Flash, reply.arg);
-                break;
-
-            case 0x3F:
+            case Mp3_Replies_PlaySource_Online: // play source online
+            case Mp3_Replies_PlaySource_Inserted: // play source inserted
+            case Mp3_Replies_PlaySource_Removed: // play source removed
                 _isOnline = true;
-                T_NOTIFICATION_METHOD::OnPlaySourceOnline(*this, static_cast<DfMp3_PlaySources>(reply.arg));
+                appendNotification(reply);
                 break;
 
-            case 0x3A:
-                _isOnline = true;
-                T_NOTIFICATION_METHOD::OnPlaySourceInserted(*this, static_cast<DfMp3_PlaySources>(reply.arg));
+            case Mp3_Replies_TrackFinished_Usb: // usb
+            case Mp3_Replies_TrackFinished_Sd: // micro sd
+            case Mp3_Replies_TrackFinished_Flash: // flash
+                appendNotification(reply);
                 break;
 
-            case 0x3B:
-                _isOnline = true;
-                T_NOTIFICATION_METHOD::OnPlaySourceRemoved(*this, static_cast<DfMp3_PlaySources>(reply.arg));
-                break;
-
-            case Mp3_Commands_Error: // error
+            case Mp3_Replies_Error: // error
                 if (command == Mp3_Commands_None)
                 {
-                    T_NOTIFICATION_METHOD::OnError(*this, reply.arg);
+                    appendNotification(reply);
                 }
-                // fall through
-            case Mp3_Commands_Ack: // ack
-                // fall through
+                if (command != Mp3_Commands_None)
+                {
+                    return reply;
+                }
+                break;
+
+            case Mp3_Replies_Ack: // ack
             default:
                 if (command != Mp3_Commands_None)
                 {
@@ -516,5 +622,6 @@ private:
             data++;
         }
     }
+
 #endif
 };

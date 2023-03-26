@@ -92,6 +92,12 @@ void setup()
   Serial.println("initializing...");
   
   dfmp3.begin();
+  // for boards that support hardware arbitrary pins
+  // dfmp3.begin(10, 11); // RX, TX
+
+  uint16_t version = dfmp3.getSoftwareVersion();
+  Serial.print("version ");
+  Serial.println(version);
 
   uint16_t volume = dfmp3.getVolume();
   Serial.print("volume ");

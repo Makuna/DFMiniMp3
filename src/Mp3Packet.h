@@ -55,13 +55,12 @@ enum Mp3_Commands
     Mp3_Commands_PlayRandmomGlobalTrack = 0x18,
     Mp3_Commands_RepeatPlayCurrentTrack = 0x19,
     Mp3_Commands_SetDacInactive = 0x1a,
-    Mp3_Commands_GetPlaySources = 0x3f,
-    Mp3_Commands_Error = 0x40,
-    Mp3_Commands_Ack = 0x41,
+    Mp3_Commands_GetPlaySources = 0x3f, // deprecated due to conflict with replies
     Mp3_Commands_GetStatus = 0x42,
     Mp3_Commands_GetVolume = 0x43,
     Mp3_Commands_GetEq = 0x44,
     Mp3_Commands_GetPlaybackMode = 0x45,
+    Mp3_Commands_GetSoftwareVersion = 0x46,
     Mp3_Commands_GetUsbTrackount = 0x47,
     Mp3_Commands_GetSdTrackount = 0x48,
     Mp3_Commands_GetFlashTrackount = 0x49,
@@ -70,6 +69,19 @@ enum Mp3_Commands
     Mp3_Commands_GetFlashCurrentTrack = 0x4d,
     Mp3_Commands_GetFolderTrackCount = 0x4e,
     Mp3_Commands_GetTotalFolderCount = 0x4f,
+};
+
+
+enum Mp3_Replies
+{
+    Mp3_Replies_PlaySource_Inserted = 0x3a,
+    Mp3_Replies_PlaySource_Removed = 0x3b,
+    Mp3_Replies_TrackFinished_Usb = 0x3c,
+    Mp3_Replies_TrackFinished_Sd = 0x3d,
+    Mp3_Replies_TrackFinished_Flash = 0x3e,
+    Mp3_Replies_PlaySource_Online = 0x3f,
+    Mp3_Replies_Error = 0x40,
+    Mp3_Replies_Ack = 0x41,
 };
 
 const uint8_t Mp3_PacketStartCode = 0x7e;
