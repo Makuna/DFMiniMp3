@@ -377,7 +377,7 @@ private:
     void appendNotification(reply_t reply)
     {
         // store the notification for later calling so
-        // and current comms transactions can be finished
+        // current comms transactions can be finished
         // without interruption
         _queueNotifications.Enqueue(reply);
     }
