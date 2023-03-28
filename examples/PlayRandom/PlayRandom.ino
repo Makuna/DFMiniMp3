@@ -81,6 +81,7 @@ void setup()
   // for boards that support hardware arbitrary pins
   // dfmp3.begin(10, 11); // RX, TX
 
+  // if you hear popping when starting, remove this call to reset()
   dfmp3.reset(); 
   
   uint16_t version = dfmp3.getSoftwareVersion();

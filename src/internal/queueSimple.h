@@ -71,10 +71,9 @@ public:
 
     bool Dequeue(T_ITEM* item)
     {
-        *item = { 0 };
-
         if (_front == _back)
         {
+            *item = { 0 };
             return false;
         }
 
@@ -111,14 +110,15 @@ private:
         T_ITEM* queueNew = new T_ITEM[newLength];
         uint8_t backNew = 0;
 
-        // copy items from old queue vector
-        T_ITEM item;
-        while (Dequeue(&item))
+        // copy items from old queue vector to new one
+        T_ITEM* item = queueNew;
+        while (Dequeue(item))
         {
-            queueNew[backNew++] = item;
+            backNew++;
+            item++;
         }
 
-        // cleanup
+        // cleanup and use new queue
         delete[] _queue;
         _queue = queueNew;
         _length = newLength;
