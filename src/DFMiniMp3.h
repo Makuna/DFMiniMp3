@@ -290,7 +290,7 @@ public:
 
     uint16_t getFolderTrackCount(uint16_t folder)
     {
-        return getCommand(Mp3_Commands_GetFolderTrackCount).arg;
+        return getCommand(Mp3_Commands_GetFolderTrackCount, folder).arg;
     }
 
     uint16_t getTotalTrackCount(DfMp3_PlaySource source = DfMp3_PlaySource_Sd)
@@ -530,7 +530,6 @@ private:
         uint8_t retries = _comRetries;
 
 
-
 #ifdef DfMiniMp3Debug
         if (_inTransaction != 0)
         {
@@ -565,9 +564,9 @@ private:
         return reply;
     }
 
-    reply_t getCommand(uint8_t command)
+    reply_t getCommand(uint8_t command, uint16_t arg = 0)
     {
-        return retryCommand(command, command);
+        return retryCommand(command, command, arg);
     }
 
     void setCommand(uint8_t command, uint16_t arg = 0)
