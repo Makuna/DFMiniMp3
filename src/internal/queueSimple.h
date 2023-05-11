@@ -96,10 +96,14 @@ private:
     void enlarge(uint8_t newLength)
     {
 #ifdef DfMiniMp3Debug
-        DfMiniMp3Debug.print("Notifications Queue Enlarged from ");
-        DfMiniMp3Debug.print(_length);
-        DfMiniMp3Debug.print(" to ");
-        DfMiniMp3Debug.println(newLength);
+        // only debug output after construction
+        if (_queue)
+        {
+            DfMiniMp3Debug.print("Notifications Queue Enlarged from ");
+            DfMiniMp3Debug.print(_length);
+            DfMiniMp3Debug.print(" to ");
+            DfMiniMp3Debug.println(newLength);
+        }
 #endif
         if (newLength <= _length)
         {
