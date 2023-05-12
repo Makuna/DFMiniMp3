@@ -88,6 +88,12 @@ void setup()
   // for boards that support hardware arbitrary pins
   // dfmp3.begin(10, 11); // RX, TX
 
+  // during development, it's a good practice to put the module
+  // into a known state by calling reset().  
+  // You may hear popping when starting and you can remove this 
+  // call to reset() once your project is finalized
+  dfmp3.reset();
+
   uint16_t version = dfmp3.getSoftwareVersion();
   Serial.print("version ");
   Serial.println(version);
