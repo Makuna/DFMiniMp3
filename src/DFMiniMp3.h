@@ -71,9 +71,12 @@ public:
         while (abateNotification());
 
         // check for any new notifications in comms
-        while (_serial.available() >= static_cast<int>(sizeof(typename T_CHIP_VARIANT::ReceptionPacket)))
+        uint8_t maxDrains = 6;
+        while (maxDrains &&
+            _serial.available() >= static_cast<int>(sizeof(typename T_CHIP_VARIANT::ReceptionPacket)))
         {
             listenForReply(Mp3_Commands_None);
+            maxDrains--;
         }
     }
 
@@ -439,13 +442,7 @@ private:
 
     void drainResponses()
     {
-        // call all outstanding notifications
-        while (abateNotification());
-
-        while (_serial.available() > 0)
-        {
-            listenForReply(Mp3_Commands_None);
-        }
+        loop();
     }
 
     void sendPacket(uint8_t command, uint16_t arg = 0, bool requestAck = false)
@@ -612,6 +609,13 @@ private:
                 {
                     return reply;
                 }
+                break;
+            }
+
+            // for not specific listen, only drain
+            // one message at a time
+            if (command == Mp3_Commands_None)
+            {
                 break;
             }
         }
