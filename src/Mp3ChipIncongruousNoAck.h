@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------
-Mp3ChipMH2024K16SS - chip class for T_CHIP_VARIANT template features
+Mp3ChipIncongruousNoAck - chip class for T_CHIP_VARIANT template features
 
 Written by Michael C. Miller.
 
@@ -23,33 +23,36 @@ You should have received a copy of the GNU Lesser General Public
 License along with DFMiniMp3.  If not, see
 <http://www.gnu.org/licenses/>.
 -------------------------------------------------------------------------*/
-
-
 #pragma once
 
-class Mp3ChipMH2024K16SS : public Mp3ChipBase
+
+class Mp3ChipIncongruousNoAck : public Mp3ChipBase
 {
 public:
-    static const bool SendCheckSum = false;
+    static const bool SendCheckSum = true;
 
-    typedef Mp3_Packet_WithoutCheckSum SendPacket;
+    typedef Mp3_Packet_WithCheckSum SendPacket;
     typedef Mp3_Packet_WithCheckSum ReceptionPacket;
 
     static const SendPacket generatePacket(uint8_t command, uint16_t arg, bool requestAck = false)
     {
-        return {
-            Mp3_PacketStartCode,
-            Mp3_PacketVersion,
-            6, // size: of what?  without checksum this doesn't make sense
-            command,
-            requestAck,
-            static_cast<uint8_t>(arg >> 8),
-            static_cast<uint8_t>(arg & 0x00ff),
-            Mp3_PacketEndCode };
+        SendPacket packet = {
+                Mp3_PacketStartCode,
+                Mp3_PacketVersion,
+                6, // size, remaining bytes not including end code
+                command,
+                requestAck,
+                static_cast<uint8_t>(arg >> 8),
+                static_cast<uint8_t>(arg & 0x00ff),
+                0, // checksum calculated below
+                0, // checksum calculated below
+                Mp3_PacketEndCode };
+        setChecksum(&packet);
+        return packet;
     }
 
     static bool commandSupportsAck(uint8_t command)
     {
-        return true;
+        return (command > Mp3_Commands_Requests);
     }
 };
