@@ -73,7 +73,7 @@ public:
     {
         if (_front == _back)
         {
-            *item = { 0 };
+            *item = {};
             return false;
         }
 

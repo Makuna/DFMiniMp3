@@ -50,4 +50,9 @@ public:
         setChecksum(&packet);
         return packet;
     }
+
+    static bool commandSupportsAck(uint8_t command)
+    {
+        return true;
+    }
 };

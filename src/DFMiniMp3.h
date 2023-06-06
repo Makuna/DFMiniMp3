@@ -31,6 +31,7 @@ License along with DFMiniMp3.  If not, see
 #include "Mp3ChipBase.h"
 #include "Mp3ChipOriginal.h"
 #include "Mp3ChipMH2024K16SS.h"
+#include "Mp3ChipIncongruousNoAck.h"
 
 
 template <class T_SERIAL_METHOD, class T_NOTIFICATION_METHOD, class T_CHIP_VARIANT = Mp3ChipOriginal>
@@ -353,8 +354,8 @@ public:
 private:
     struct reply_t
     {
-        uint8_t command;
-        uint16_t arg;
+        uint8_t command = 0;
+        uint16_t arg = 0;
 
 #ifdef DfMiniMp3Debug
         void printReply() const
@@ -460,11 +461,11 @@ private:
 
     bool readPacket(reply_t* reply)
     {
-        typename T_CHIP_VARIANT::ReceptionPacket in = { 0 };
+        typename T_CHIP_VARIANT::ReceptionPacket in;
         uint8_t read;
 
         // init our out args always
-        *reply = { 0 };
+        *reply = {};
 
         // try to sync our reads to the packet start
         do
@@ -542,12 +543,25 @@ private:
 #ifdef DfMiniMp3Debug
         _inTransaction++;
 #endif
-        do
+        if (T_CHIP_VARIANT::commandSupportsAck(command))
         {
-            sendPacket(command, arg, requestAck); 
+            // with ack support, we may retry if we don't get
+            // what we expected
+            //
+            do
+            {
+                sendPacket(command, arg, requestAck);
+                reply = listenForReply(expectedCommand);
+                retries--;
+            } while (reply.command != expectedCommand && retries);
+        }
+        else
+        {
+            // without ack support, we try once only
+            //
+            sendPacket(command, arg, requestAck);
             reply = listenForReply(expectedCommand);
-            retries--;
-        } while (reply.command != expectedCommand && retries);
+        }
 #ifdef DfMiniMp3Debug
         _inTransaction--;
 #endif
@@ -555,7 +569,7 @@ private:
         if (reply.command == Mp3_Replies_Error)
         {
             T_NOTIFICATION_METHOD::OnError(*this, reply.arg);
-            reply = { 0 };
+            reply = {};
         }
         
         return reply;
@@ -621,7 +635,7 @@ private:
         }
 
 
-        return { 0 };
+        return {};
     }
 
 #ifdef DfMiniMp3Debug

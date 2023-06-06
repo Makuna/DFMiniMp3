@@ -55,6 +55,7 @@ enum Mp3_Commands
     Mp3_Commands_PlayRandmomGlobalTrack = 0x18,
     Mp3_Commands_RepeatPlayCurrentTrack = 0x19,
     Mp3_Commands_SetDacInactive = 0x1a,
+    Mp3_Commands_Requests = 0x30, // after this is all request, before all actions
     Mp3_Commands_GetPlaySources = 0x3f, // deprecated due to conflict with replies
     Mp3_Commands_GetStatus = 0x42,
     Mp3_Commands_GetVolume = 0x43,
