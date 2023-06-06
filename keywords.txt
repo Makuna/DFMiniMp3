@@ -15,6 +15,9 @@ DfMp3_PlaySource	KEYWORD1
 DfMp3_PlaySources	KEYWORD1
 DfMp3_StatusState	KEYWORD1
 DfMp3_StatusSource	KEYWORD1
+Mp3ChipOriginal	KEYWORD1
+Mp3ChipMH2024K16SS	KEYWORD1
+Mp3ChipIncongruousNoAck	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
