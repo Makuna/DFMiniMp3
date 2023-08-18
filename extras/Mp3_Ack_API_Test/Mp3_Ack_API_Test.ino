@@ -1,8 +1,16 @@
-//#include <SoftwareSerial.h>
 
+
+#define MP3_RX_PIN 15
+#define MP3_TX_PIN 2
+
+//#include <SoftwareSerial.h>
+//SoftwareSerial Mp3Serial(MP3_RX_PIN, MP3_TX_PIN); // RX, TX
+//#define Mp3SerialType SoftwareSerial
+
+#define Mp3SerialType HardwareSerial
+#define Mp3Serial Serial1
 
 #define DebugOut Serial
-#define Mp3Serial Serial1
 #define DfMiniMp3Debug DebugOut
 
 #include <DFMiniMp3.h>
@@ -13,7 +21,7 @@ class Mp3Notify;
 
 // define a handy type using serial and our notify class
 //
-typedef DFMiniMp3<HardwareSerial, Mp3Notify> DfMp3; 
+typedef DFMiniMp3<Mp3SerialType, Mp3Notify> DfMp3;
 
 class Mp3Notify
 {
@@ -63,18 +71,16 @@ public:
 
 DfMp3 mp3(Mp3Serial);
 
-//SoftwareSerial secondarySerial(13, 15); // RX, TX
-//DFMiniMp3<SoftwareSerial, Mp3Notify> mp3(secondarySerial);
-
 uint32_t setupStart;
 
 void setup() 
 {
   DebugOut.begin(115200);
   
-  mp3.begin(15, 2); // rx, tx
+  //mp3.begin(); // when you can't set the pins OR software serial is used
+  mp3.begin(MP3_RX_PIN, MP3_TX_PIN); // rx, tx
   
-  // use Serial for MP3 playback
+  // use hardware serial Serial for MP3 playback on ESP8266
   // move serial to GPIO15(TX) and GPIO13 (RX) for
   // the mp3 module, we loose the debug monitor though
   //Serial.swap();
