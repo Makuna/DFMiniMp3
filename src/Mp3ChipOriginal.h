@@ -51,7 +51,7 @@ public:
         return packet;
     }
 
-    static bool commandSupportsAck(uint8_t command)
+    static bool commandSupportsAck([[maybe_unused]] uint8_t command)
     {
         return true;
     }
