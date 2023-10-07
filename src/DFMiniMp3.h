@@ -52,13 +52,11 @@ public:
     void begin(unsigned long baud = 9600)
     {
         _serial.begin(baud);
-        _serial.setTimeout(900); // long enough to allow Mp3 to think
     }
 
     void begin(int8_t rxPin, int8_t txPin, unsigned long baud = 9600)
     {
         _serial.begin(baud, SERIAL_8N1, rxPin, txPin);
-        _serial.setTimeout(900); // long enough to allow Mp3 to think
     }
 
     void setComRetries(uint8_t retries)
@@ -73,6 +71,9 @@ public:
 
         // check for any new notifications in comms
         uint8_t maxDrains = 6;
+
+        _serial.setTimeout(c_NoTimeout);
+
         while (maxDrains &&
             _serial.available() >= static_cast<int>(sizeof(typename T_CHIP_VARIANT::ReceptionPacket)))
         {
@@ -357,6 +358,11 @@ private:
         uint8_t command = 0;
         uint16_t arg = 0;
 
+        bool isUndefined()
+        {
+            return (command == Mp3_Commands_None);
+        }
+
 #ifdef DfMiniMp3Debug
         void printReply() const
         {
@@ -369,6 +375,10 @@ private:
         }
 #endif
     };
+
+    const uint32_t c_AckTimeout = 900;
+    const uint32_t c_NoAckTimeout = 50;
+    const uint32_t c_NoTimeout = 0;
 
     T_SERIAL_METHOD& _serial;
     uint8_t _comRetries;
@@ -545,10 +555,10 @@ private:
 #endif
         if (T_CHIP_VARIANT::commandSupportsAck(command))
         {
-            // with ack support, we may retry if we don't get
-            // what we expected
+            // with ack support, 
+            // we may retry if we don't get what we expected
             //
-            do
+            _serial.setTimeout(c_AckTimeout);             do
             {
                 sendPacket(command, arg, requestAck);
                 reply = listenForReply(expectedCommand);
@@ -557,10 +567,16 @@ private:
         }
         else
         {
-            // without ack support, we try once only
+            // without ack support, 
+            // we may retry only if we get an error
             //
-            sendPacket(command, arg, requestAck);
-            reply = listenForReply(expectedCommand);
+            _serial.setTimeout(c_NoAckTimeout);
+            do
+            {
+                sendPacket(command, arg, requestAck);
+                reply = listenForReply(expectedCommand);
+                retries--;
+            } while (reply.command == Mp3_Replies_Error && retries);
         }
 #ifdef DfMiniMp3Debug
         _inTransaction--;
