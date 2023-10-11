@@ -72,8 +72,6 @@ public:
         // check for any new notifications in comms
         uint8_t maxDrains = 6;
 
-        _serial.setTimeout(c_NoTimeout);
-
         while (maxDrains &&
             _serial.available() >= static_cast<int>(sizeof(typename T_CHIP_VARIANT::ReceptionPacket)))
         {
@@ -376,9 +374,8 @@ private:
 #endif
     };
 
-    const uint32_t c_AckTimeout = 900;
-    const uint32_t c_NoAckTimeout = 50;
-    const uint32_t c_NoTimeout = 0;
+    const uint32_t c_AckTimeout = 900; 
+    const uint32_t c_NoAckTimeout = 50; // 30ms observerd, added a little overhead
 
     T_SERIAL_METHOD& _serial;
     uint8_t _comRetries;
