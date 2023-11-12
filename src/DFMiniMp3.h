@@ -34,7 +34,7 @@ License along with DFMiniMp3.  If not, see
 #include "Mp3ChipIncongruousNoAck.h"
 
 
-template <class T_SERIAL_METHOD, class T_NOTIFICATION_METHOD, class T_CHIP_VARIANT = Mp3ChipOriginal>
+template <class T_SERIAL_METHOD, class T_NOTIFICATION_METHOD, class T_CHIP_VARIANT = Mp3ChipOriginal, uint32_t C_ACK_TIMEOUT = 900>
 class DFMiniMp3
 {
 public:
@@ -374,7 +374,7 @@ private:
 #endif
     };
 
-    const uint32_t c_AckTimeout = 900; 
+    const uint32_t c_AckTimeout = C_ACK_TIMEOUT;
     const uint32_t c_NoAckTimeout = 50; // 30ms observerd, added a little overhead
 
     T_SERIAL_METHOD& _serial;
@@ -555,7 +555,8 @@ private:
             // with ack support, 
             // we may retry if we don't get what we expected
             //
-            _serial.setTimeout(c_AckTimeout);             do
+            _serial.setTimeout(c_AckTimeout);             
+            do
             {
                 sendPacket(command, arg, requestAck);
                 reply = listenForReply(expectedCommand);
