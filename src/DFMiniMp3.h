@@ -33,8 +33,13 @@ License along with DFMiniMp3.  If not, see
 #include "Mp3ChipMH2024K16SS.h"
 #include "Mp3ChipIncongruousNoAck.h"
 
+#include "DfMp3NoCallback.h"
+#include "DfMp3Callback.h"
 
-template <class T_SERIAL_METHOD, class T_NOTIFICATION_METHOD, class T_CHIP_VARIANT = Mp3ChipOriginal, uint32_t C_ACK_TIMEOUT = 900>
+template <class T_SERIAL_METHOD, 
+    class T_NOTIFICATION_METHOD = DfMp3NoCallback,
+    class T_CHIP_VARIANT = Mp3ChipOriginal, 
+    uint32_t C_ACK_TIMEOUT = 900>
 class DFMiniMp3
 {
 public:
@@ -78,6 +83,16 @@ public:
             listenForReply(Mp3_Commands_None);
             maxDrains--;
         }
+    }
+
+    void attach(typename T_NOTIFICATION_METHOD::TargetType* target)
+    {
+        T_NOTIFICATION_METHOD::attach(target);
+    }
+
+    void detach(typename T_NOTIFICATION_METHOD::TargetType* target)
+    {
+        T_NOTIFICATION_METHOD::detach(target);
     }
 
     // Does not work with all models.
@@ -411,31 +426,31 @@ private:
         switch (reply.command)
         {
         case Mp3_Replies_TrackFinished_Usb: // usb
-            T_NOTIFICATION_METHOD::OnPlayFinished(*this, DfMp3_PlaySources_Usb, reply.arg);
+            T_NOTIFICATION_METHOD::OnPlayFinished(DfMp3_PlaySources_Usb, reply.arg);
             break;
 
         case Mp3_Replies_TrackFinished_Sd: // micro sd
-            T_NOTIFICATION_METHOD::OnPlayFinished(*this, DfMp3_PlaySources_Sd, reply.arg);
+            T_NOTIFICATION_METHOD::OnPlayFinished(DfMp3_PlaySources_Sd, reply.arg);
             break;
 
         case Mp3_Replies_TrackFinished_Flash: // flash
-            T_NOTIFICATION_METHOD::OnPlayFinished(*this, DfMp3_PlaySources_Flash, reply.arg);
+            T_NOTIFICATION_METHOD::OnPlayFinished(DfMp3_PlaySources_Flash, reply.arg);
             break;
 
         case Mp3_Replies_PlaySource_Online:
-            T_NOTIFICATION_METHOD::OnPlaySourceOnline(*this, static_cast<DfMp3_PlaySources>(reply.arg));
+            T_NOTIFICATION_METHOD::OnPlaySourceOnline(static_cast<DfMp3_PlaySources>(reply.arg));
             break;
 
         case Mp3_Replies_PlaySource_Inserted:
-            T_NOTIFICATION_METHOD::OnPlaySourceInserted(*this, static_cast<DfMp3_PlaySources>(reply.arg));
+            T_NOTIFICATION_METHOD::OnPlaySourceInserted(static_cast<DfMp3_PlaySources>(reply.arg));
             break;
 
         case Mp3_Replies_PlaySource_Removed:
-            T_NOTIFICATION_METHOD::OnPlaySourceRemoved(*this, static_cast<DfMp3_PlaySources>(reply.arg));
+            T_NOTIFICATION_METHOD::OnPlaySourceRemoved(static_cast<DfMp3_PlaySources>(reply.arg));
             break;
 
         case Mp3_Replies_Error: // error
-            T_NOTIFICATION_METHOD::OnError(*this, reply.arg);
+            T_NOTIFICATION_METHOD::OnError(reply.arg);
             break;
 
         default:
@@ -582,7 +597,7 @@ private:
 
         if (reply.command == Mp3_Replies_Error)
         {
-            T_NOTIFICATION_METHOD::OnError(*this, reply.arg);
+            T_NOTIFICATION_METHOD::OnError(reply.arg);
             reply = {};
         }
         
