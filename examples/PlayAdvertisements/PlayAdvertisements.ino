@@ -15,7 +15,13 @@
 class Mp3Notify
 {
 public:
+    // required type
     typedef void TargetType;
+
+    // required constructor
+    Mp3Notify(TargetType*)
+    { 
+    };
 
     static void PrintlnSourceAction(DfMp3_PlaySources source, const char* action)
     {
@@ -34,6 +40,7 @@ public:
         Serial.println(action);
     }
 
+    // required method
     static void OnError(uint16_t errorCode)
     {
         // see DfMp3_Error for code meaning
@@ -42,22 +49,26 @@ public:
         Serial.println(errorCode);
     }
 
+    // required method
     static void OnPlayFinished([[maybe_unused]] DfMp3_PlaySources source, uint16_t track)
     {
         Serial.print("Play finished for #");
         Serial.println(track);
     }
 
+    // required method
     static void OnPlaySourceOnline(DfMp3_PlaySources source)
     {
         PrintlnSourceAction(source, "online");
     }
 
+    // required method
     static void OnPlaySourceInserted(DfMp3_PlaySources source)
     {
         PrintlnSourceAction(source, "inserted");
     }
 
+    // required method
     static void OnPlaySourceRemoved(DfMp3_PlaySources source)
     {
         PrintlnSourceAction(source, "removed");

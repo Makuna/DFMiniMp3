@@ -33,14 +33,13 @@ class Mp3Manager
 {
 public:
     Mp3Manager() :
-        _dfmp3(Serial1)
-//      _dfmp3(secondarySerial); // for software serial
+        _dfmp3(Serial1, this)
+//      _dfmp3(secondarySerial, this); // for software serial
     {
     }
 
     ~Mp3Manager()
     {
-        _dfmp3.detach(this);
     }
 
     // not required but common practice 
@@ -48,10 +47,6 @@ public:
     //
     void begin()
     {
-        // attach this class as the notification target
-        // required for this class to get forwarded notifications
-        _dfmp3.attach(this); 
-
         _dfmp3.begin();
         // for boards that support hardware arbitrary pins
         // _dfmp3.begin(10, 11); // RX, TX

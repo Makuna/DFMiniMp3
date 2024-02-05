@@ -30,6 +30,10 @@ class DfMp3NoCallback
 public:
     typedef void TargetType;
 
+    DfMp3NoCallback(TargetType*)
+    {
+    };
+
     static void OnError(uint16_t)
     {
     }

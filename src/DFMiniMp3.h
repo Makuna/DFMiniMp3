@@ -43,8 +43,9 @@ template <class T_SERIAL_METHOD,
 class DFMiniMp3
 {
 public:
-    explicit DFMiniMp3(T_SERIAL_METHOD& serial) :
+    explicit DFMiniMp3(T_SERIAL_METHOD& serial, typename T_NOTIFICATION_METHOD::TargetType* target = nullptr) :
         _serial(serial),
+        _notify(target),
         _comRetries(3), // default to three retries
         _isOnline(false),
 #ifdef DfMiniMp3Debug
@@ -83,16 +84,6 @@ public:
             listenForReply(Mp3_Commands_None);
             maxDrains--;
         }
-    }
-
-    void attach(typename T_NOTIFICATION_METHOD::TargetType* target)
-    {
-        T_NOTIFICATION_METHOD::attach(target);
-    }
-
-    void detach(typename T_NOTIFICATION_METHOD::TargetType* target)
-    {
-        T_NOTIFICATION_METHOD::detach(target);
     }
 
     // Does not work with all models.
@@ -392,7 +383,9 @@ private:
     const uint32_t c_AckTimeout = C_ACK_TIMEOUT;
     const uint32_t c_NoAckTimeout = 50; // 30ms observerd, added a little overhead
 
+
     T_SERIAL_METHOD& _serial;
+    T_NOTIFICATION_METHOD _notify;
     uint8_t _comRetries;
     volatile bool _isOnline;
 #ifdef DfMiniMp3Debug

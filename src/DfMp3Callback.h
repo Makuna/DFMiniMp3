@@ -31,17 +31,14 @@ class DfMp3Callback
 public:
     typedef T_CALLBACK_TARGET TargetType;
 
-    static void attach(T_CALLBACK_TARGET* target)
+    explicit DfMp3Callback(TargetType* target)
     {
         s_target = target;
     }
 
-    static void detach(T_CALLBACK_TARGET* target)
+    ~DfMp3Callback()
     {
-        if (target == s_target)
-        {
-            s_target = nullptr;
-        }
+        s_target = nullptr;
     }
 
     static void OnError(uint16_t errorCode)
