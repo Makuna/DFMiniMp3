@@ -419,31 +419,31 @@ private:
         switch (reply.command)
         {
         case Mp3_Replies_TrackFinished_Usb: // usb
-            T_NOTIFICATION_METHOD::OnPlayFinished(DfMp3_PlaySources_Usb, reply.arg);
+            _notify.OnPlayFinished(DfMp3_PlaySources_Usb, reply.arg);
             break;
 
         case Mp3_Replies_TrackFinished_Sd: // micro sd
-            T_NOTIFICATION_METHOD::OnPlayFinished(DfMp3_PlaySources_Sd, reply.arg);
+            _notify.OnPlayFinished(DfMp3_PlaySources_Sd, reply.arg);
             break;
 
         case Mp3_Replies_TrackFinished_Flash: // flash
-            T_NOTIFICATION_METHOD::OnPlayFinished(DfMp3_PlaySources_Flash, reply.arg);
+            _notify.OnPlayFinished(DfMp3_PlaySources_Flash, reply.arg);
             break;
 
         case Mp3_Replies_PlaySource_Online:
-            T_NOTIFICATION_METHOD::OnPlaySourceOnline(static_cast<DfMp3_PlaySources>(reply.arg));
+            _notify.OnPlaySourceOnline(static_cast<DfMp3_PlaySources>(reply.arg));
             break;
 
         case Mp3_Replies_PlaySource_Inserted:
-            T_NOTIFICATION_METHOD::OnPlaySourceInserted(static_cast<DfMp3_PlaySources>(reply.arg));
+            _notify.OnPlaySourceInserted(static_cast<DfMp3_PlaySources>(reply.arg));
             break;
 
         case Mp3_Replies_PlaySource_Removed:
-            T_NOTIFICATION_METHOD::OnPlaySourceRemoved(static_cast<DfMp3_PlaySources>(reply.arg));
+            _notify.OnPlaySourceRemoved(static_cast<DfMp3_PlaySources>(reply.arg));
             break;
 
         case Mp3_Replies_Error: // error
-            T_NOTIFICATION_METHOD::OnError(reply.arg);
+            _notify.OnError(reply.arg);
             break;
 
         default:
@@ -590,7 +590,7 @@ private:
 
         if (reply.command == Mp3_Replies_Error)
         {
-            T_NOTIFICATION_METHOD::OnError(reply.arg);
+            _notify.OnError(reply.arg);
             reply = {};
         }
         
