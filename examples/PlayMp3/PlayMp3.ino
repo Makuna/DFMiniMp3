@@ -33,7 +33,7 @@ class Mp3Manager
 {
 public:
     Mp3Manager() :
-        _dfmp3(Serial1, this)
+        _dfmp3(Serial1, this) // NOTE: passing this object as the notification target
 //      _dfmp3(secondarySerial, this); // for software serial
     {
     }
@@ -43,7 +43,7 @@ public:
     }
 
     // not required but common practice 
-    // as _dfmp3.attach() and _dfmp3.begin() must get called
+    // as _dfmp3.begin() must get called
     //
     void begin()
     {
