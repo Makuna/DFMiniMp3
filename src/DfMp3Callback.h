@@ -31,7 +31,7 @@ class DfMp3Callback
 public:
     typedef T_CALLBACK_TARGET TargetType;
 
-    explicit DfMp3Callback(TargetType* target)
+    static void SetTarget(TargetType* target)
     {
         s_target = target;
     }

@@ -45,7 +45,6 @@ class DFMiniMp3
 public:
     explicit DFMiniMp3(T_SERIAL_METHOD& serial, typename T_NOTIFICATION_METHOD::TargetType* target = nullptr) :
         _serial(serial),
-        _notify(target),
         _comRetries(3), // default to three retries
         _isOnline(false),
 #ifdef DfMiniMp3Debug
@@ -53,6 +52,7 @@ public:
 #endif
         _queueNotifications(4) // default to 4 notifications in queue
     {
+        _notify.SetTarget(target);
     }
 
     void begin(unsigned long baud = 9600)

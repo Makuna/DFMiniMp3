@@ -18,10 +18,10 @@ public:
     // required type
     typedef void TargetType;
 
-    // required constructor
-    Mp3Notify(TargetType*)
-    { 
-    };
+    // required method even though it doesn't do anything
+    static void SetTarget(TargetType*)
+    {
+    }
 
     static void PrintlnSourceAction(DfMp3_PlaySources source, const char* action)
     {
